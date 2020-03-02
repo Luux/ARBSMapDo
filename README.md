@@ -1,5 +1,7 @@
 # ARBSMapDo - Advanced Ranked Beat Saber Map Downloader
 
+(WIP - some things may still be broken. Please help me finding bugs :) )
+
 *Yet another map downloader tool? Who needs this?!?*
 
 While there are plenty of tools and mods that help downloading playlists, trending maps from score saber and more, their filtering options are kinda limited. I wanted a tool with options like "Download 100 new ranked maps that range from 3.5 to 6 star difficulty, have a minimum of 70% positive Votes and a length between 2:00 and 3:30". ARBSMapDo allows exactly that.
@@ -14,7 +16,7 @@ While there are plenty of tools and mods that help downloading playlists, trendi
 
 ## Dependencies
 
-Python > 3.4 (due to pathlib) and some libs from requirements.txt
+Python > 3.4 (due to pathlib) and some libs from requirements.txt. Just run `pip install -r requirements.txt` and you're ready.
 
 
 ## Usage
@@ -39,8 +41,6 @@ The options in the preset file are named the same as the command line options li
 Currently available command line options (more to be implemented):
 
 ```
-arbsmapdo.py --help
-
 usage: arbsmapdo.py [-h] [--preset PRESET]
                     [--levels_to_download LEVELS_TO_DOWNLOAD]
                     [--stars_min STARS_MIN] [--stars_max STARS_MAX]
@@ -49,6 +49,10 @@ usage: arbsmapdo.py [-h] [--preset PRESET]
                     [--max_threads MAX_THREADS]
                     [--scoresaber_limit SCORESABER_LIMIT]
                     [--save_preset SAVE_PRESET]
+                    [--vote_ratio_min VOTE_RATIO_MIN]
+                    [--vote_ratio_max VOTE_RATIO_MAX]
+                    [--duration_min DURATION_MIN]
+                    [--duration_max DURATION_MAX]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -78,4 +82,20 @@ optional arguments:
   --save_preset SAVE_PRESET
                         Save specified settings into given file. You can load
                         it next time by using --preset
+  --vote_ratio_min VOTE_RATIO_MIN
+                        Minimum percentage of positive votes of total votes.
+                        (Between 0 and 1)
+  --vote_ratio_max VOTE_RATIO_MAX
+                        Maximum percentage of positive votes of total votes.
+                        (Between 0 and 1)
+  --duration_min DURATION_MIN
+                        Minimum song duration in seconds
+  --duration_max DURATION_MAX
+                        Maximum song duration in seconds
 ```
+
+
+## Legal Disclaimer
+
+ARBSMapDo is a tool that allows downloading Custom Levels for the Game *Beat Saber* developed by *Beat Games*. The level information is accessed from both the scoresaber API and BeatSaver. The levels itself are user-generated content hosted on BeatSaver, which is where they are downloaded from as well. BeatSaver allows users to upload these levels and hosts them for other users to download. I am not affiliated with BeatSaver in any form, nor do I host user-generated content myself. Any potential copyright infringements have to be directly reported to BeatSaver via a DCMA request at https://beatsaver.com/legal/dmca
+
