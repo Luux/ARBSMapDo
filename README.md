@@ -1,6 +1,6 @@
 # ARBSMapDo - Advanced Ranked Beat Saber Map Downloader
 
-(WIP - some things may still be broken. Please help me finding bugs :) )
+(WIP - some things ~~may~~ *will* still be broken. Please help me finding bugs! :) )
 
 *Yet another map downloader tool? Who needs this?!?*
 
@@ -8,7 +8,7 @@ While there are plenty of tools and mods that help downloading playlists, trendi
 
 ## Features
 
-* Easy and fast downloading of (mostly ranked) maps crawled from Scoresaber
+* Easy mass downloading of (mostly ranked) maps crawled from Scoresaber
 * Filtering options not relying solely on the (undocumented) Scoresaber API - new options can (and will!) be easily added
 * Presets - if you want to apply the same filters and download new maps again in a few weeks, you can simply save your settings
 * Open Source, of course.
@@ -21,7 +21,11 @@ Python > 3.4 (due to pathlib) and some libs from requirements.txt. Just run `pip
 
 ## Usage
 
-You can either run arbsmapdo.py without any arguments to run an assistant (may be missing some advanced config stuff), specify some options from the command line or use a preset file.
+There are currently 3 ways to specify filters:
+1) Without any arguments. There will be an assistant that guides you through common options. Some advanced options will not be shown.
+2) Command line usage
+3) Using a preset file
+
 
 
 ### Presets
@@ -75,7 +79,7 @@ optional arguments:
                         extracted (usually '[BeatSaberPath]\Beat
                         Saber_Data\CustomLevels')
   --max_threads MAX_THREADS
-                        Maximim thread count to use for downloading.
+                        Maximum thread count to use for downloading.
   --scoresaber_limit SCORESABER_LIMIT
                         Maps per 'page' for Scoresaber API. There seems to be
                         an upper limit. You usually don't have to change this.
@@ -97,5 +101,4 @@ optional arguments:
 
 ## Legal Disclaimer
 
-ARBSMapDo is a tool that allows downloading Custom Levels for the Game *Beat Saber* developed by *Beat Games*. The level information is accessed from both the scoresaber API and BeatSaver. The levels itself are user-generated content hosted on BeatSaver, which is where they are downloaded from as well. BeatSaver allows users to upload these levels and hosts them for other users to download. I am not affiliated with BeatSaver in any form, nor do I host user-generated content myself. Any potential copyright infringements have to be directly reported to BeatSaver via a DCMA request at https://beatsaver.com/legal/dmca
-
+ARBSMapDo is a tool that helps filtering and downloading Custom Levels for the Game *Beat Saber* developed by *Beat Games*. The level information is accessed from both the scoresaber API and BeatSaver. The levels itself are user-generated content hosted on BeatSaver, which is where they are downloaded from as well. BeatSaver allows users to upload these levels and hosts them for other users to download. I am not affiliated with BeatSaver in any form, nor do I host user-generated content myself. Any potential copyright infringements have to be directly reported to BeatSaver via a DCMA request at https://beatsaver.com/legal/dmca as I am not responsible for any content hosted there.
