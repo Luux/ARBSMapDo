@@ -8,6 +8,7 @@ import zipfile
 
 from inspect import getfile
 from pathlib import Path
+from json import JSONDecodeError
 
 dir_script = Path(getfile(lambda: 0)).parent
 
@@ -27,9 +28,21 @@ class advanced_downloader():
         self.max_threads = config["max_threads"]
         self.stars_min = config["stars_min"]
         self.stars_max = config["stars_max"]
+        self.vote_ratio_min = config["vote_ratio_min"]
+        self.vote_ratio_max = config["vote_ratio_max"]
+        self.duration_min = config["duration_min"]
+        self.duration_max = config["duration_max"]
 
     def start(self):
+        # Create Download Directory if not existant
+        self.download_dir.mkdir(exist_ok=True)
+
+        self.already_downloaded = os.listdir(self.download_dir)
+
+        # Crawl Scoresaber and filter
         levels_to_download = self.fetch_and_filter()
+
+        # Finally, download filtered Maps
         self.download_levels(levels_to_download)
 
     def download_levels(self, levels: list):
@@ -86,67 +99,106 @@ class advanced_downloader():
         download_list = []
         ids_to_filter = []
 
-        print("Searching on Scoresaber for levels to download...")
-        bar = progressbar.ProgressBar(max_value=self.levels_to_download)
-        bar.update(0)
+        # yeah, double while. Why? Simply because first filtering based only on ScoreSaber information is done before
+        # getting information from BeatSaver to save some time (Scoresaber is way faster than BeatSaver)
         while len(download_list) < self.levels_to_download:
-            limit = self.scoresaber_limit
-            remaining = self.levels_to_download - len(download_list)
-            if remaining < self.scoresaber_limit:
-                limit = remaining
+            print("Searching on Scoresaber for levels to download. Need to find {} more songs.".format(self.levels_to_download - len(download_list)))
+            bar = progressbar.ProgressBar(max_value=self.levels_to_download - len(download_list))
+            bar.update(0)
+            scoresaber_filtered_list = []
+
+            while len(scoresaber_filtered_list) < self.levels_to_download - len(download_list):
+                limit = self.scoresaber_limit
+                remaining = self.levels_to_download - len(download_list) - len(scoresaber_filtered_list)
+                if remaining < self.scoresaber_limit:
+                    limit = remaining
+                
+                page = int(((requested_unfiltered) / limit) + 1)
+
+                levels = self._call_scoresaber_api(page, limit)["songs"]
+                requested_unfiltered += limit
+
+                # ScoreSaber is faster, so we filter based on only scoresaber information first before accessing BeatSaver
+                filtered = []
+                for level in levels:
+                    if self._filter_level_scoresaber_only(level, ids_to_filter):
+                        # If it survived all the filtering -> add to filtered list
+                        filtered.append(level)
+                        ids_to_filter.append(level["id"])
+
+                scoresaber_filtered_list.extend(filtered)
+                bar.update(len(scoresaber_filtered_list))
+                sys.stdout.flush()
             
-            page = int(((requested_unfiltered) / limit) + 1)
-
-            levels = self._call_scoresaber_api(page, limit)["songs"]
-            requested_unfiltered += limit
-
-            filtered, ids_to_filter = self._filter_levels_scoresaber_only(levels, ids_to_filter)
-
-            download_list.extend(filtered)
-            bar.update(len(download_list))
-            sys.stdout.flush()
-        
-        # Adding information from scoresaber including download URL
-        with progressbar.ProgressBar(max_value=len(download_list)) as bar:
-            print("\nGetting info from beatsaver...")
-            for level in download_list:
-                level["beatsaver_info"] = self._get_beatsaver_info(level["id"])
-                bar.update(bar.value + 1)
+            # Adding information from scoresaber including download URL
+            with progressbar.ProgressBar(max_value=len(scoresaber_filtered_list)) as bar:
+                print("\nGetting info from beatsaver...")
+                for level in scoresaber_filtered_list:
+                    level["beatsaver_info"] = self._get_beatsaver_info(level["id"])
+                    if self._filter_level_with_beatsaver_info(level) is True:
+                        download_list.append(level)
+                    bar.update(bar.value + 1)
         return download_list
 
-    def _filter_levels_scoresaber_only(self, levellist, ids_to_filter):
-        filtered = []
-        already_downloaded = []
-        if self.download_dir.exists():
-            already_downloaded = os.listdir(self.download_dir)
 
-        for level in levellist:
-            dirname = self._get_level_dirname(level)
+    def _filter_level_scoresaber_only(self, scoresaber_info, ids_to_filter):
+        dirname = self._get_level_dirname(scoresaber_info)
 
-             # filter already downloaded
-            if dirname in already_downloaded:
-                print(os.listdir(self.download_dir))
-                continue
+            # filter already downloaded
+        if dirname in self.already_downloaded:
+            print(os.listdir(self.download_dir))
+            return False
 
-            # Filter by difficulty
-            stars = float(level["stars"])
-            if stars > self.stars_max or stars < self.stars_min:
-                continue
+        # Filter by difficulty
+        stars = float(scoresaber_info["stars"])
+        if stars > self.stars_max or stars < self.stars_min:
+            return False
 
-            # Scoresaber seems to have an extra entry for each difficulty.
-            # We just need to download a level once, lol.
-            if level["id"] in ids_to_filter:
-                continue
-            
-            # If it survived all the filtering -> add to filtered list
-            filtered.append(level)
-            ids_to_filter.append(level["id"])
+        # Scoresaber seems to have an extra entry for each difficulty.
+        # We just need to download a level1 once, lol.
+        if scoresaber_info["id"] in ids_to_filter:
+            return False
+        
+        return True
 
-        return filtered, ids_to_filter
-    
+    def _filter_level_with_beatsaver_info(self, level):
+        bs_info = level["beatsaver_info"]
+        if bs_info is None:
+            return False
+        bs_metadata = bs_info["metadata"]
+        bs_stats = bs_info["stats"]
+        bs_upvotes = int(bs_stats["upVotes"])
+        bs_downvotes = int(bs_stats["downVotes"])
+        durations = [float(bs_metadata["duration"])]
+
+        bs_characteristics = bs_metadata.get("characteristics")
+        for characteristic in bs_characteristics:
+            difficulties = characteristic.get("difficulties")
+            for info in difficulties.values():
+                if info is not None:
+                    durations.append(float(info["duration"]))
+
+
+        vote_ratio = bs_upvotes / (bs_upvotes + bs_downvotes)
+        if vote_ratio < self.vote_ratio_min or vote_ratio > self.vote_ratio_max:
+            return False
+        
+        duration_ok = False
+        for duration in durations:
+            if duration >= self.duration_min and duration <= self.duration_max:
+                duration_ok = True
+        if not duration_ok:
+            return False
+
+        return True
+
     def _get_beatsaver_info(self, level_id):
-        response = requests.get("https://beatsaver.com/api/maps/by-hash/{id}".format(id=level_id), headers=headers)
-        json = response.json()
+        try:
+            response = requests.get("https://beatsaver.com/api/maps/by-hash/{id}".format(id=level_id), headers=headers)
+            json = response.json()
+        except JSONDecodeError:
+            print("Failed to get level {} from Beat Saver.".format(level_id))
+            return None
         return json
 
     def _get_level_dirname(self, level_scoresaber_dict):

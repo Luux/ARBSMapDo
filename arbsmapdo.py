@@ -87,6 +87,29 @@ def handle_missing_arguments(config_dict):
         response = float(response.replace(",", ".")) if response is not "" else 50
         config_dict["stars_max"] = response
 
+    if config_dict.get("vote_ratio_min") is None:
+        print("What's the minimum percentage of upvotes (of total votes) the map should have? (Default: 0)")
+        response = input()
+        response = float(response.replace(",", ".")) if response is not "" else 0
+        config_dict["vote_ratio_min"] = response
+    
+    if config_dict.get("duration_min") is None:
+        print("Do you want to set a minimum song duration (in seconds)? (Default: 0)")
+        response = input()
+        response = float(response.replace(",", ".")) if response is not "" else 0
+        config_dict["duration_min"] = response
+    
+    if config_dict.get("duration_max") is None:
+        print("Do you want to set a maximum song duration (in seconds)? (Default: infinite)")
+        response = input()
+        response = float(response.replace(",", ".")) if response is not "" else float("inf")
+        config_dict["duration_max"] = response
+
+    # Non-common options that are only available via command line or presets
+
+    if config_dict.get("vote_ratio_max") is None:
+        config_dict["vote_ratio_max"] = 1
+
     if config_dict.get("tmp_dir") is None:
         config_dict["tmp_dir"] = "./tmp"
 
@@ -122,6 +145,10 @@ if __name__ == "__main__":
     parser.add_argument("--max_threads", type=int, help="Maximim thread count to use for downloading.")
     parser.add_argument("--scoresaber_limit", type=int, help="Maps per 'page' for Scoresaber API. There seems to be an upper limit. You usually don't have to change this.")
     parser.add_argument("--save_preset", type=Path, help="Save specified settings into given file. You can load it next time by using --preset")
+    parser.add_argument("--vote_ratio_min", type=float, help="Minimum percentage of positive votes of total votes. (Between 0 and 1)")
+    parser.add_argument("--vote_ratio_max", type=float, help="Maximum percentage of positive votes of total votes. (Between 0 and 1)")
+    parser.add_argument("--duration_min", type=int, help="Minimum song duration in seconds")
+    parser.add_argument("--duration_max", type=int, help="Maximum song duration in seconds")
     args = parser.parse_args()
 
     print("\n-------------------------------------------------------------")
