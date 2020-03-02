@@ -104,31 +104,33 @@ class advanced_downloader():
         print("Beginning map search. This may take multiple passes depending on how restrictive your filters are.")
         while len(download_list) < self.levels_to_download:
             print("Searching on Scoresaber for levels to download. Need to find {} more songs.".format(self.levels_to_download - len(download_list)))
-            bar = progressbar.ProgressBar(max_value=self.levels_to_download - len(download_list))
-            bar.update(0)
-            scoresaber_filtered_list = []
 
-            while len(scoresaber_filtered_list) < self.levels_to_download - len(download_list):
-                limit = self.scoresaber_limit
-                remaining = self.levels_to_download - len(download_list) - len(scoresaber_filtered_list)
+            with progressbar.ProgressBar(max_value=self.levels_to_download - len(download_list), redirect_stdout=True) as bar:
+                bar.update(0)
+                scoresaber_filtered_list = []
 
-                page = int(((requested_unfiltered) / limit) + 1)
+                while len(scoresaber_filtered_list) < self.levels_to_download - len(download_list):
+                    limit = self.scoresaber_limit
+                    remaining = self.levels_to_download - len(download_list) - len(scoresaber_filtered_list)
 
-                levels = self._call_scoresaber_api(page, limit)["songs"]
-                requested_unfiltered += limit
+                    page = int(((requested_unfiltered) / limit) + 1)
 
-                # ScoreSaber is faster, so we filter based on only scoresaber information first before accessing BeatSaver
-                filtered = []
-                for level in levels:
-                    if len(filtered) < remaining:
-                        if self._filter_level_scoresaber_only(level, ids_to_filter):
-                            # If it survived all the filtering -> add to filtered list
-                            filtered.append(level)
-                            ids_to_filter.append(level["id"])
+                    levels = self._call_scoresaber_api(page, limit)["songs"]
+                    requested_unfiltered += limit
 
-                scoresaber_filtered_list.extend(filtered)
-                bar.update(len(scoresaber_filtered_list))
-                sys.stdout.flush()
+                    # ScoreSaber is faster, so we filter based on only scoresaber information first before accessing BeatSaver
+                    filtered = []
+                    for level in levels:
+                        if len(filtered) < remaining:
+                            if self._filter_level_scoresaber_only(level, ids_to_filter):
+                                # If it survived all the filtering -> add to filtered list
+                                filtered.append(level)
+                                ids_to_filter.append(level["id"])
+
+                    scoresaber_filtered_list.extend(filtered)
+                    bar.update(len(scoresaber_filtered_list))
+                    # print("Total entries processed from ScoreSaber: " + str(requested_unfiltered))
+                    sys.stdout.flush()
             
             # Adding information from scoresaber including download URL
             with progressbar.ProgressBar(max_value=len(scoresaber_filtered_list)) as bar:
@@ -144,9 +146,14 @@ class advanced_downloader():
     def _filter_level_scoresaber_only(self, scoresaber_info, ids_to_filter):
         dirname = self._get_level_dirname(scoresaber_info)
 
+        if "andesu" in dirname:
+            print("sdfsdf")
+
             # filter already downloaded
         if dirname in self.already_downloaded:
             return False
+
+        
 
         # Filter by difficulty
         stars = float(scoresaber_info["stars"])
@@ -203,7 +210,7 @@ class advanced_downloader():
     def _get_level_dirname(self, level_scoresaber_dict):
         # levelAuthorName and name can contain characters invalid for file or directory names
         # we need to filter them out
-        valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
+        valid_chars = "-_() %s%s" % (string.ascii_letters, string.digits)
 
         author = "".join(c for c in level_scoresaber_dict["levelAuthorName"] if c in valid_chars).replace(" ", "-")
         levelname = "".join(c for c in level_scoresaber_dict["name"] if c in valid_chars).replace(" ", "-")
