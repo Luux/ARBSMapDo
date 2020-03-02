@@ -224,4 +224,4 @@ class advanced_downloader():
             return response.json()
 
 if __name__ == "__main__":
-    print("This is just the internal downloader class. Please run arbsmapdo.py/arbsmapdo.exe instead :)")
+    print("This is just the internal downloader class. Please run arbsmapdo.py instead :)")
