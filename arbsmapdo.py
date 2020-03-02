@@ -88,7 +88,7 @@ def handle_missing_arguments(config_dict):
         config_dict["stars_max"] = response
 
     if config_dict.get("vote_ratio_min") is None:
-        print("What's the minimum percentage of upvotes (of total votes) the map should have? (Default: 0)")
+        print("What's the minimum percentage of upvotes (of total votes) the map should have? (Value between 0 and 1, Default: 0)")
         response = input()
         response = float(response.replace(",", ".")) if response is not "" else 0
         config_dict["vote_ratio_min"] = response
