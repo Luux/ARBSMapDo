@@ -6,6 +6,8 @@
 
 While there are plenty of tools and mods that help downloading playlists, trending maps from score saber and more, their filtering options are kinda limited. I wanted a tool with options like "Download 100 new ranked maps that range from 3.5 to 6 star difficulty, have a minimum of 70% positive Votes and a length between 2:00 and 3:30". ARBSMapDo allows exactly that.
 
+Currently, there are only a few common filtering options implemented. More are planned, but currently I'm focusing on a robust and user-friendly foundation (since not everyone is used to handle command line scripts with a huge number of options)
+
 ## Features
 
 * Easy mass downloading of (mostly ranked) maps crawled from Scoresaber
