@@ -53,22 +53,22 @@ def handle_missing_arguments(config_dict):
         save_config(config_dict, default_config_name)
     
     if config_dict.get("ranked_only") is None:
-        print("Would you like to download only levels that have a ranked map?")
+        print("Would you like to download only levels that have a ranked map? (Default: 1)")
         print("(A Level will be downloaded if there's at least one ranked difficulty)")
         print("0 - All Maps")
         print("1 - Ranked Only")
         response = input()
-        ranked_only = "1" if response is "1" else "0"
+        ranked_only = "0" if response is "0" else "1"
         config_dict["ranked_only"] = ranked_only
     
     if config_dict.get("scoresaber_sorting") is None:
-            print("Which sorting (from scoresaber side) should be used?")
+            print("Which sorting (from scoresaber side) should be used? (Default: 1)")
             print("0 - Trends")
             print("1 - Date Ranked")
             print("2 - Scores Set")
             print("3 - Star Difficulty (only if ranked)")
             response = input()
-            config_dict["scoresaber_sorting"] = response if response in ["0", "1", "2", "3"] else "0"
+            config_dict["scoresaber_sorting"] = response if response in ["0", "1", "2", "3"] else "1"
 
     if config_dict.get("levels_to_download") is None:
         print("How many levels do you want to download?")
