@@ -14,7 +14,7 @@ While there are plenty of tools and mods that help downloading playlists, trendi
 
 ## Dependencies
 
-Python > 3.4 (due to pathlib) and some libs from requirements.txt
+Python > 3.4 (due to pathlib) and some libs from requirements.txt. Just run `pip install -r requirements.txt` and you're ready.
 
 
 ## Usage
