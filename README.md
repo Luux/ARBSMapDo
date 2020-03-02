@@ -83,5 +83,5 @@ optional arguments:
 
 ## Legal Disclaimer
 
-ARBSMapDo is a tool that allows downloading Custom Levels for the Game *Beat Saber* developed by *Beat Games*. The level information is accessed from both the scoresaber API and BeatSaver. The levels itself are user-generated contend hosted on BeatSaver, which is where they are downloaded from as well. BeatSaver allows users to upload these levels and hosts them for other users to download. I am not affiliated with BeatSaver in any form, nor do I host user-generated content myself. Any copyright infringements have to be directly reported to BeatSaver via a DCMA request at https://beatsaver.com/legal/dmca
+ARBSMapDo is a tool that allows downloading Custom Levels for the Game *Beat Saber* developed by *Beat Games*. The level information is accessed from both the scoresaber API and BeatSaver. The levels itself are user-generated contend hosted on BeatSaver, which is where they are downloaded from as well. BeatSaver allows users to upload these levels and hosts them for other users to download. I am not affiliated with BeatSaver in any form, nor do I host user-generated content myself. Any potential copyright infringements have to be directly reported to BeatSaver via a DCMA request at https://beatsaver.com/legal/dmca
 
