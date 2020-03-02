@@ -101,6 +101,7 @@ class advanced_downloader():
 
         # yeah, double while. Why? Simply because first filtering based only on ScoreSaber information is done before
         # getting information from BeatSaver to save some time (Scoresaber is way faster than BeatSaver)
+        print("Beginning map search. This may take multiple passes depending on how restrictive your filters are.")
         while len(download_list) < self.levels_to_download:
             print("Searching on Scoresaber for levels to download. Need to find {} more songs.".format(self.levels_to_download - len(download_list)))
             bar = progressbar.ProgressBar(max_value=self.levels_to_download - len(download_list))
@@ -110,9 +111,7 @@ class advanced_downloader():
             while len(scoresaber_filtered_list) < self.levels_to_download - len(download_list):
                 limit = self.scoresaber_limit
                 remaining = self.levels_to_download - len(download_list) - len(scoresaber_filtered_list)
-                if remaining < self.scoresaber_limit:
-                    limit = remaining
-                
+
                 page = int(((requested_unfiltered) / limit) + 1)
 
                 levels = self._call_scoresaber_api(page, limit)["songs"]
@@ -121,10 +120,11 @@ class advanced_downloader():
                 # ScoreSaber is faster, so we filter based on only scoresaber information first before accessing BeatSaver
                 filtered = []
                 for level in levels:
-                    if self._filter_level_scoresaber_only(level, ids_to_filter):
-                        # If it survived all the filtering -> add to filtered list
-                        filtered.append(level)
-                        ids_to_filter.append(level["id"])
+                    if len(filtered) < remaining:
+                        if self._filter_level_scoresaber_only(level, ids_to_filter):
+                            # If it survived all the filtering -> add to filtered list
+                            filtered.append(level)
+                            ids_to_filter.append(level["id"])
 
                 scoresaber_filtered_list.extend(filtered)
                 bar.update(len(scoresaber_filtered_list))
@@ -146,7 +146,6 @@ class advanced_downloader():
 
             # filter already downloaded
         if dirname in self.already_downloaded:
-            print(os.listdir(self.download_dir))
             return False
 
         # Filter by difficulty
