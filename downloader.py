@@ -219,10 +219,9 @@ class advanced_downloader():
         )
 
     def _call_scoresaber_api(self, page, limit):
-        scoresaber_sorting = 1 if self.scoresaber_sorting else 0
         ranked_only = 1 if self.ranked_only else 0
         response = requests.get("https://scoresaber.com/api.php?function=get-leaderboards&cat={cat}&page={page}&limit={limit}&ranked={ranked_only}"
-                                .format(cat=scoresaber_sorting, page=page, limit=limit, ranked_only=ranked_only),
+                                .format(cat=self.scoresaber_sorting, page=page, limit=limit, ranked_only=ranked_only),
                                 headers=headers)
         if response.ok:
             return response.json()
