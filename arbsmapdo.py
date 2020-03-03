@@ -193,6 +193,9 @@ if __name__ == "__main__":
     downloader = advanced_downloader(config)
     downloader.start()
 
+    # Only for EXE releases
+    # print("\n\nDone! Press enter to close ARBSMapDo.")
+    # input()
 
 
 
