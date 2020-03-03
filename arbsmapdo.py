@@ -116,8 +116,8 @@ def handle_missing_arguments(config_dict):
     if config_dict.get("max_threads") is None:
         config_dict["max_threads"] = 5
     
-    if config_dict["scoresaber_limit"] is None:
-        config_dict["scoresaber_limit"] = 20
+    if config_dict["scoresaber_maxlimit"] is None:
+        config_dict["scoresaber_maxlimit"] = 1000
 
     save_preset = config_dict.get("save_preset")
     if save_preset is not None:
@@ -143,7 +143,7 @@ if __name__ == "__main__":
     parser.add_argument("--tmp_dir", type=Path, help="Temporary download dir (default: './download/')")
     parser.add_argument("--download_dir", type=Path, help="Final download folder where custom levels get extracted (usually '[BeatSaberPath]\\Beat Saber_Data\\CustomLevels')")
     parser.add_argument("--max_threads", type=int, help="Maximim thread count to use for downloading.")
-    parser.add_argument("--scoresaber_limit", type=int, help="Maps per 'page' for Scoresaber API. There seems to be an upper limit. You usually don't have to change this.")
+    parser.add_argument("--scoresaber_maxlimit", type=int, help="Maximum maps per 'page' for Scoresaber API. (You usually don't have to change this.)")
     parser.add_argument("--save_preset", type=Path, help="Save specified settings into given file. You can load it next time by using --preset")
     parser.add_argument("--vote_ratio_min", type=float, help="Minimum percentage of positive votes of total votes. (Between 0 and 1)")
     parser.add_argument("--vote_ratio_max", type=float, help="Maximum percentage of positive votes of total votes. (Between 0 and 1)")

@@ -23,7 +23,7 @@ class advanced_downloader():
         self.ranked_only = config["ranked_only"]
         self.scoresaber_sorting = config["scoresaber_sorting"]
         self.levels_to_download = config["levels_to_download"]
-        self.scoresaber_limit = config["scoresaber_limit"]
+        self.scoresaber_maxlimit = config["scoresaber_maxlimit"]
         self.tmp_dir = dir_script.joinpath(config["tmp_dir"])
         self.max_threads = config["max_threads"]
         self.stars_min = config["stars_min"]
@@ -110,7 +110,7 @@ class advanced_downloader():
                 scoresaber_filtered_list = []
 
                 while len(scoresaber_filtered_list) < self.levels_to_download - len(download_list):
-                    limit = self.scoresaber_limit
+                    limit = self.scoresaber_maxlimit
                     remaining = self.levels_to_download - len(download_list) - len(scoresaber_filtered_list)
 
                     page = int(((requested_unfiltered) / limit) + 1)
