@@ -146,9 +146,6 @@ class advanced_downloader():
     def _filter_level_scoresaber_only(self, scoresaber_info, ids_to_filter):
         dirname = self._get_level_dirname(scoresaber_info)
 
-        if "andesu" in dirname:
-            print("sdfsdf")
-
             # filter already downloaded
         if dirname in self.already_downloaded:
             return False
