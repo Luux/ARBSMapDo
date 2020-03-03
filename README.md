@@ -53,7 +53,7 @@ usage: arbsmapdo.py [-h] [--preset PRESET]
                     [--ranked RANKED] [--scoresaber_sorting {0,1,2}]
                     [--tmp_dir TMP_DIR] [--download_dir DOWNLOAD_DIR]
                     [--max_threads MAX_THREADS]
-                    [--scoresaber_limit SCORESABER_LIMIT]
+                    [--scoresaber_maxlimit SCORESABER_MAXLIMIT]
                     [--save_preset SAVE_PRESET]
                     [--vote_ratio_min VOTE_RATIO_MIN]
                     [--vote_ratio_max VOTE_RATIO_MAX]
@@ -81,10 +81,10 @@ optional arguments:
                         extracted (usually '[BeatSaberPath]\Beat
                         Saber_Data\CustomLevels')
   --max_threads MAX_THREADS
-                        Maximum thread count to use for downloading.
-  --scoresaber_limit SCORESABER_LIMIT
-                        Maps per 'page' for Scoresaber API. There seems to be
-                        an upper limit. You usually don't have to change this.
+                        Maximim thread count to use for downloading.
+  --scoresaber_maxlimit SCORESABER_MAXLIMIT
+                        Maximum maps per 'page' for Scoresaber API. (You
+                        usually don't have to change this.)
   --save_preset SAVE_PRESET
                         Save specified settings into given file. You can load
                         it next time by using --preset
