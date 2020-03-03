@@ -116,7 +116,13 @@ class advanced_downloader():
                     page = int(((requested_unfiltered) / limit) + 1)
 
                     levels = self._call_scoresaber_api(page, limit)["songs"]
+
                     requested_unfiltered += limit
+
+                    if len(levels) == 0:
+                        # Early Abort, no more songs with these filters -> Proceed to download stage
+                        print("Could not find more than {} levels under the given criteria.".format(len(download_list)))
+                        return download_list
 
                     # ScoreSaber is faster, so we filter based on only scoresaber information first before accessing BeatSaver
                     filtered = []
