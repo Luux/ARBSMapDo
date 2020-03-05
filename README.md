@@ -10,7 +10,7 @@ Currently, there are only a few common filtering options implemented. More are p
 
 ## Features
 
-* Easy mass downloading of (mostly ranked) maps crawled from Scoresaber
+* Easy mass downloading of maps crawled from Scoresaber
 * Filtering options not relying solely on the (undocumented) Scoresaber API - new options can (and will!) be easily added
 * Presets - if you want to apply the same filters and download new maps again in a few weeks, you can simply save your settings
 * Open Source, of course.
