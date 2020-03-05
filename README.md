@@ -19,6 +19,7 @@ Currently, there are only a few common filtering options implemented. More are p
 ## Dependencies
 
 Python > 3.4 (due to pathlib) and some libs from requirements.txt. Just run `pip install -r requirements.txt` and you're ready.
+Or just use the latest standalone release, which is an ready-to-run .exe ;)
 
 
 ## Usage
