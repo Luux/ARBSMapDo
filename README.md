@@ -1,6 +1,6 @@
 # ARBSMapDo - Advanced Ranked Beat Saber Map Downloader
 
-Get a standalone release without any prerequisites here: https://github.com/Luux/ARBSMapDo/releases
+**A standalone release without any prerequisites is available here: https://github.com/Luux/ARBSMapDo/releases**
 
 *Yet another map downloader tool? Who needs this?!?*
 
