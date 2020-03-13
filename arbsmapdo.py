@@ -36,9 +36,9 @@ class ConfigHandler:
                 # When given a non existant Config
                 print("Config not found. Aborting")
 
-        for key in args_dict.keys():
-            if preset_config.get(key) is not None:
-                args_dict[key] = preset_config[key]
+        for key in preset_config.keys():
+            if args_dict.get(key) is None:
+                args_dict[key] = preset_config.get(key)
 
         self.config = args_dict
 
