@@ -32,6 +32,10 @@ class advanced_downloader():
         self.vote_ratio_max = config["vote_ratio_max"]
         self.duration_min = config["duration_min"]
         self.duration_max = config["duration_max"]
+        self.notes_min = config["notes_min"]
+        self.notes_max = config["notes_max"]
+        self.nps_min = config["nps_min"]
+        self.nps_max = config["nps_max"]
 
     def start(self):
         # Create Download Directory if not existant
@@ -156,8 +160,6 @@ class advanced_downloader():
         if dirname in self.already_downloaded:
             return False
 
-        
-
         # Filter by difficulty
         stars = float(scoresaber_info["stars"])
         if stars > self.stars_max or stars < self.stars_min:
@@ -171,6 +173,29 @@ class advanced_downloader():
         return True
 
     def _filter_level_with_beatsaver_info(self, level):
+        def _filter_difficulty(difficulty_info, level):
+            if difficulty_info is None:
+                return False
+            duration = float(difficulty_info["duration"])
+            note_count = int(difficulty_info["notes"])
+
+            if duration == 0:
+                # for some reason, sometimes the duration as well as other values are 0... -> broken info
+                return False
+
+            notes_per_second = float(note_count) / duration
+
+            if duration < self.duration_min or duration > self.duration_max:
+                return False
+
+            if note_count < self.notes_min or note_count > self.notes_max:
+                return False
+
+            if notes_per_second < self.nps_min or notes_per_second > self.nps_max:
+                return False
+
+            return True
+
         bs_info = level["beatsaver_info"]
         if bs_info is None:
             return False
@@ -178,25 +203,23 @@ class advanced_downloader():
         bs_stats = bs_info["stats"]
         bs_upvotes = int(bs_stats["upVotes"])
         bs_downvotes = int(bs_stats["downVotes"])
-        durations = [float(bs_metadata["duration"])]
 
+        # Filter each difficulty
         bs_characteristics = bs_metadata.get("characteristics")
+        characteristics_ok = False
         for characteristic in bs_characteristics:
             difficulties = characteristic.get("difficulties")
             for info in difficulties.values():
-                if info is not None:
-                    durations.append(float(info["duration"]))
+                if _filter_difficulty(info, level):
+                    characteristics_ok = True
 
 
         vote_ratio = bs_upvotes / (bs_upvotes + bs_downvotes)
+
         if vote_ratio < self.vote_ratio_min or vote_ratio > self.vote_ratio_max:
             return False
-        
-        duration_ok = False
-        for duration in durations:
-            if duration >= self.duration_min and duration <= self.duration_max:
-                duration_ok = True
-        if not duration_ok:
+
+        if not characteristics_ok:
             return False
 
         return True
