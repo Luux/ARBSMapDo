@@ -30,8 +30,8 @@ class advanced_downloader():
         self.stars_max = config["stars_max"]
         self.vote_ratio_min = config["vote_ratio_min"]
         self.vote_ratio_max = config["vote_ratio_max"]
-        self.duration_min = config["duration_min"]
-        self.duration_max = config["duration_max"]
+        self.length_min = config["length_min"]
+        self.length_max = config["length_max"]
         self.notes_min = config["notes_min"]
         self.notes_max = config["notes_max"]
         self.nps_min = config["nps_min"]
@@ -176,16 +176,16 @@ class advanced_downloader():
         def _filter_difficulty(difficulty_info, level):
             if difficulty_info is None:
                 return False
-            duration = float(difficulty_info["duration"])
+            length = float(difficulty_info["length"])
             note_count = int(difficulty_info["notes"])
 
-            if duration == 0:
+            if length == 0:
                 # for some reason, sometimes the duration as well as other values are 0... -> broken info
                 return False
 
-            notes_per_second = float(note_count) / duration
+            notes_per_second = float(note_count) / length
 
-            if duration < self.duration_min or duration > self.duration_max:
+            if length < self.length_min or length > self.length_max:
                 return False
 
             if note_count < self.notes_min or note_count > self.notes_max:

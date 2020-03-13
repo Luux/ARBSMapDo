@@ -59,7 +59,7 @@ class ConfigHandler:
             self.config["max_threads"] = 5
         
         if self.config["scoresaber_maxlimit"] is None:
-            self.config["scoresaber_maxlimit"] = 1000
+            self.config["scoresaber_maxlimit"] = 10000
 
         if self.config.get("nps_min") is None:
             self.config["nps_min"] = 0
@@ -113,13 +113,13 @@ class ConfigHandler:
             print("What's the minimum percentage of upvotes (of total votes) the map should have? (Value between 0 and 1, Default: 0)")
             self.config["vote_ratio_min"] = self.get_validated_input(float, default=0, min_value=0, max_value=1)
 
-        if self.config.get("length") is None:
-            print("Do you want to set a minimum song duration (in seconds)? (Default: 0)")
-            self.config["duration_min"] = self.get_validated_input(float, default=0, min_value=0)
+        if self.config.get("length_min") is None:
+            print("Do you want to set a minimum map length (in seconds)? (Default: 0)")
+            self.config["length_min"] = self.get_validated_input(float, default=0, min_value=0)
         
-        if self.config.get("duration_max") is None:
-            print("Do you want to set a maximum song duration (in seconds)? (Default: infinite)")
-            self.config["duration_max"] = self.get_validated_input(float, default=float("inf"), min_value=0)
+        if self.config.get("length_max") is None:
+            print("Do you want to set a maximum map length (in seconds)? (Default: infinite)")
+            self.config["length_max"] = self.get_validated_input(float, default=float("inf"), min_value=0)
 
 
         save_preset = self.config.get("save_preset")
@@ -184,8 +184,8 @@ if __name__ == "__main__":
     parser.add_argument("--save_preset", type=Path, help="Save specified settings into given file. You can load it next time by using --preset")
     parser.add_argument("--vote_ratio_min", type=float, help="Minimum percentage of positive votes of total votes. (Between 0 and 1)")
     parser.add_argument("--vote_ratio_max", type=float, help="Maximum percentage of positive votes of total votes. (Between 0 and 1)")
-    parser.add_argument("--duration_min", type=int, help="Minimum song duration in seconds")
-    parser.add_argument("--duration_max", type=int, help="Maximum song duration in seconds")
+    parser.add_argument("--length_min", type=int, help="Minimum map length in seconds")
+    parser.add_argument("--length_max", type=int, help="Maximum map length in seconds")
     parser.add_argument("--nps_min", type=float, help="Minimum notes per second")
     parser.add_argument("--nps_max", type=float, help="Maximum notes per second")
     parser.add_argument("--notes_min", type=int, help="Minimum total note count")
