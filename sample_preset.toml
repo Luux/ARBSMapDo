@@ -1,0 +1,8 @@
+ranked_only=true
+scoresaber_sorting=1
+levels_to_download=10
+length_min=0
+length_max=+inf
+stars_min=3
+stars_max=7.5
+vote_ratio_min=0.5
