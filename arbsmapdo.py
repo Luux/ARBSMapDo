@@ -175,7 +175,7 @@ if __name__ == "__main__":
     parser.add_argument("-levels", "--levels_to_download", type=int, help="Number of levels to download. One level may have multiple difficulties!")
     parser.add_argument("--stars_min", type=int, help="Minimum star difficulty for ranked maps")
     parser.add_argument("--stars_max", type=int, help="Maximum star difficulty for ranked maps")
-    parser.add_argument("--ranked", type=bool, help="Only download ranked maps (True or False / 1 or 0)")
+    parser.add_argument("--ranked_only", type=bool, help="Only download ranked maps (True or False / 1 or 0)")
     parser.add_argument("--scoresaber_sorting", type=int, choices=[0, 1, 2], help="Scoresaber Sorting Mode. Choices: 0 - Trends, 1 - Date Ranked, 2 - Scores Set, 3 - Star Difficulty")
     parser.add_argument("--tmp_dir", type=Path, help="Temporary download dir (default: './download/')")
     parser.add_argument("--download_dir", type=Path, help="Final download folder where custom levels get extracted (usually '[BeatSaberPath]\\Beat Saber_Data\\CustomLevels')")
