@@ -109,47 +109,51 @@ class advanced_downloader():
         while len(download_list) < self.levels_to_download:
             print("Searching on Scoresaber for levels to download. Need to find {} more songs.".format(self.levels_to_download - len(download_list)))
 
-            with progressbar.ProgressBar(max_value=self.levels_to_download - len(download_list), redirect_stdout=True) as bar:
-                bar.update(0)
-                scoresaber_filtered_list = []
+            #with progressbar.ProgressBar(max_value=self.levels_to_download - len(download_list), redirect_stdout=False) as bar_levelsearch:
+                #bar_levelsearch.update(0)
+            scoresaber_filtered_list = []
 
-                while len(scoresaber_filtered_list) < self.levels_to_download - len(download_list):
-                    limit = self.scoresaber_maxlimit
-                    remaining = self.levels_to_download - len(download_list) - len(scoresaber_filtered_list)
+            while len(scoresaber_filtered_list) < self.levels_to_download - len(download_list):
+                limit = self.scoresaber_maxlimit
+                remaining = self.levels_to_download - len(download_list) - len(scoresaber_filtered_list)
 
-                    page = int(((requested_unfiltered) / limit) + 1)
+                page = int(((requested_unfiltered) / limit) + 1)
 
-                    levels = self._call_scoresaber_api(page, limit)["songs"]
+                levels = self._call_scoresaber_api(page, limit)["songs"]
 
-                    requested_unfiltered += limit
+                requested_unfiltered += limit
 
-                    if len(levels) == 0:
-                        # Early Abort, no more songs with these filters -> Proceed to download stage
-                        print("Could not find more than {} levels under the given criteria.".format(len(download_list)))
-                        return download_list
+                if len(levels) == 0:
+                    # Early Abort, no more songs with these filters -> Proceed to download stage
+                    print("Could not find more than {} levels under the given criteria.".format(len(download_list)))
+                    return download_list
 
-                    # ScoreSaber is faster, so we filter based on only scoresaber information first before accessing BeatSaver
-                    filtered = []
-                    for level in levels:
-                        if len(filtered) < remaining:
-                            if self._filter_level_scoresaber_only(level, ids_to_filter):
-                                # If it survived all the filtering -> add to filtered list
-                                filtered.append(level)
-                                ids_to_filter.append(level["id"])
+                # ScoreSaber is faster, so we filter based on only scoresaber information first before accessing BeatSaver
+                filtered = []
+                for level in levels:
+                    if self._filter_level_scoresaber_only(level, ids_to_filter):
+                        # If it survived all the filtering -> add to filtered list
+                        filtered.append(level)
+                        ids_to_filter.append(level["id"])
 
-                    scoresaber_filtered_list.extend(filtered)
-                    bar.update(len(scoresaber_filtered_list))
-                    # print("Total entries processed from ScoreSaber: " + str(requested_unfiltered))
-                    sys.stdout.flush()
-            
-            # Adding information from scoresaber including download URL
-            with progressbar.ProgressBar(max_value=len(scoresaber_filtered_list)) as bar:
-                print("\nGetting info from beatsaver...")
-                for level in scoresaber_filtered_list:
-                    level["beatsaver_info"] = self._get_beatsaver_info(level["id"])
-                    if self._filter_level_with_beatsaver_info(level) is True:
-                        download_list.append(level)
-                    bar.update(bar.value + 1)
+                scoresaber_filtered_list.extend(filtered)
+                print("Filtered " + str(len(scoresaber_filtered_list)) + " potential candidates from Scoresaber data only")
+                # print("Total entries processed from ScoreSaber: " + str(requested_unfiltered))
+                #sys.stdout.flush()
+        
+                # Adding information from scoresaber including download URL
+                filtered_beatsaver = 0
+                print("Filtering candidates by info from beatsaver...")
+                with progressbar.ProgressBar(max_len=len(scoresaber_filtered_list), redirect_stdout=True) as bar:
+                    for level in scoresaber_filtered_list:
+                        level["beatsaver_info"] = self._get_beatsaver_info(level["id"])
+                        if self._filter_level_with_beatsaver_info(level) is True:
+                            download_list.append(level)
+                            print("Found Levels: {}/{}".format(len(download_list), self.levels_to_download))
+                        filtered_beatsaver += 1
+                        bar.update(filtered_beatsaver)
+                        if len(download_list) == self.levels_to_download:
+                            return download_list
         return download_list
 
 
