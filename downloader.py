@@ -36,6 +36,7 @@ class advanced_downloader():
         self.notes_max = config["notes_max"]
         self.nps_min = config["nps_min"]
         self.nps_max = config["nps_max"]
+        self.mode = config["mode"]
 
     def start(self):
         # Create Download Directory if not existant
@@ -199,6 +200,17 @@ class advanced_downloader():
                 return False
 
             return True
+        
+        def _filter_characteristic(characteristic):
+            name = characteristic.get("name")
+            if name != self.mode:
+                return False
+
+            difficulties = characteristic.get("difficulties")
+            for info in difficulties.values():
+                if _filter_difficulty(info, level):
+                    return True
+
 
         bs_info = level["beatsaver_info"]
         if bs_info is None:
@@ -210,13 +222,11 @@ class advanced_downloader():
 
         # Filter each difficulty
         bs_characteristics = bs_metadata.get("characteristics")
+
         characteristics_ok = False
         for characteristic in bs_characteristics:
-            difficulties = characteristic.get("difficulties")
-            for info in difficulties.values():
-                if _filter_difficulty(info, level):
-                    characteristics_ok = True
-
+            if _filter_characteristic(characteristic):
+                characteristics_ok = True
 
         vote_ratio = bs_upvotes / (bs_upvotes + bs_downvotes)
 

@@ -8,13 +8,21 @@ from inspect import getfile
 from downloader import advanced_downloader
 
 
+
 dir_script = Path(getfile(lambda: 0)).parent
 
 default_config_name = "arbsmapdo_default.toml"
 
 skip_assistant=False
 
+modes = {
+        0: None,
+        1: "Standard",
+        2: "OneSaber"
+    }
+
 class ConfigHandler:
+
     def __init__(self, args):
         # Non-"None" Arguments passed overwrite the preset
         args_dict = vars(args)
@@ -73,6 +81,9 @@ class ConfigHandler:
         if self.config.get("notes_max") is None:
             self.config["notes_max"] = sys.maxsize
 
+        if self.config.get("mode" is None):
+            self.config["mode"] = "Standard"
+
         # Here comes everything the assistant will deal with
         if self.config.get("download_dir") is None:
             print("Download directory not yet specified. Please input the download directory (usually '[BeatSaberPath]\\Beat Saber_Data\\CustomLevels').")
@@ -100,6 +111,16 @@ class ConfigHandler:
                 print("2 - Scores Set")
                 print("3 - Star Difficulty (only if ranked)")
                 self.config["scoresaber_sorting"] = self.get_validated_input(dst_type=int, default=1, choices=[0, 1, 2, 3])
+
+        # Currently disabled
+        if self.config.get("mode") is None:
+            print("Filter by Game Mode? (Note that this probably isn't very useful when looking for ranked maps)")
+            print("0 - No Game Mode filtering (default)")
+            print("1 - Standard")
+            print("2 - OneSaber")
+            mode_num = self.get_validated_input(int, 0, choices=[0, 1, 2])
+            mode = modes[mode_num]
+            self.config["mode"] = mode
 
         if self.config.get("stars_min") is None:
             print("Minimum Stars? (Default: 0)")
@@ -190,6 +211,7 @@ if __name__ == "__main__":
     parser.add_argument("--nps_max", type=float, help="Maximum notes per second")
     parser.add_argument("--notes_min", type=int, help="Minimum total note count")
     parser.add_argument("--notes_max", type=int, help="Maximum total note count")
+    parser.add_argument("--mode", type=str, choices=modes.values(), help="Filter by mode.")
     parser.add_argument("-s", "--skip_assistant", action="store_true",
                         help="Skip assistant except for neccessary things. You'll need to specify every argument via command line or preset")
     args = parser.parse_args()
