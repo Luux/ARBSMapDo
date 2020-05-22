@@ -18,7 +18,12 @@ skip_assistant=False
 modes = {
         0: None,
         1: "Standard",
-        2: "OneSaber"
+        2: "OneSaber",
+        3: "NoArrows",
+        4: "Degree90",
+        5: "Degree360",
+        6: "Lightshow",
+        7: "Lawless"
     }
 
 class ConfigHandler:
@@ -112,13 +117,15 @@ class ConfigHandler:
                 print("3 - Star Difficulty (only if ranked)")
                 self.config["scoresaber_sorting"] = self.get_validated_input(dst_type=int, default=1, choices=[0, 1, 2, 3])
 
-        # Currently disabled
-        if self.config.get("mode") is None:
-            print("Filter by Game Mode? (Note that this probably isn't very useful when looking for ranked maps)")
-            print("0 - No Game Mode filtering (default)")
-            print("1 - Standard")
-            print("2 - OneSaber")
-            mode_num = self.get_validated_input(int, 0, choices=[0, 1, 2])
+        # Note that this probably isn't very useful when looking for ranked maps,
+        # so ARBSMapDo will only ask for mode if not ranked_only.
+        # However, if you really want to do it, you can do this via command line or preset
+        
+        if self.config.get("mode") is None and not self.config["ranked_only"]:
+            print("Filter by Game Mode? (default: None/No filtering)")
+            for key in modes:
+                print("{} - {}".format(key, modes[key]))
+            mode_num = self.get_validated_input(int, 0, choices=range(len(modes.values())))
             mode = modes[mode_num]
             self.config["mode"] = mode
 
@@ -211,7 +218,7 @@ if __name__ == "__main__":
     parser.add_argument("--nps_max", type=float, help="Maximum notes per second")
     parser.add_argument("--notes_min", type=int, help="Minimum total note count")
     parser.add_argument("--notes_max", type=int, help="Maximum total note count")
-    parser.add_argument("--mode", type=str, choices=modes.values(), help="Filter by mode.")
+    parser.add_argument("--mode", type=str, choices=list(modes.values()), help="Filter by mode.")
     parser.add_argument("-s", "--skip_assistant", action="store_true",
                         help="Skip assistant except for neccessary things. You'll need to specify every argument via command line or preset")
     args = parser.parse_args()

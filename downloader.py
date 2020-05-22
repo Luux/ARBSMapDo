@@ -227,9 +227,10 @@ class advanced_downloader():
         for characteristic in bs_characteristics:
             if _filter_characteristic(characteristic):
                 characteristics_ok = True
-
-        vote_ratio = bs_upvotes / (bs_upvotes + bs_downvotes)
-
+        
+        vote_ratio = 0.5 # division / 0 if map has no votes yet
+        if bs_upvotes + bs_downvotes > 0:
+            vote_ratio = bs_upvotes / (bs_upvotes + bs_downvotes)
         if vote_ratio < self.vote_ratio_min or vote_ratio > self.vote_ratio_max:
             return False
 
