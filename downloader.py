@@ -5,6 +5,7 @@ import string
 import progressbar
 import threading
 import zipfile
+import beatsaver
 
 from inspect import getfile
 from pathlib import Path
@@ -12,9 +13,7 @@ from json import JSONDecodeError
 
 dir_script = Path(getfile(lambda: 0)).parent
 
-# Cloudflare refuses access if we don't have a UserAgent
 headers = {"User-Agent": "ARBSMapDo V1"}
-
 
 class advanced_downloader():
     def __init__(self, config: dict):
@@ -37,6 +36,8 @@ class advanced_downloader():
         self.nps_min = config["nps_min"]
         self.nps_max = config["nps_max"]
         self.mode = config["mode"]
+
+        self.beatsaver = beatsaver.BeatSaver()
 
     def start(self):
         # Create Download Directory if not existant
@@ -147,7 +148,7 @@ class advanced_downloader():
                 print("Filtering candidates by info from beatsaver...")
                 with progressbar.ProgressBar(max_len=len(scoresaber_filtered_list), redirect_stdout=True) as bar:
                     for level in scoresaber_filtered_list:
-                        level["beatsaver_info"] = self._get_beatsaver_info(level["id"])
+                        level["beatsaver_info"] = self.beatsaver.get_beatsaver_info(level["id"])
                         if self._filter_level_with_beatsaver_info(level) is True:
                             download_list.append(level)
                             print("Found Levels: {}/{}".format(len(download_list), self.levels_to_download))
@@ -238,15 +239,6 @@ class advanced_downloader():
             return False
 
         return True
-
-    def _get_beatsaver_info(self, level_id):
-        try:
-            response = requests.get("https://beatsaver.com/api/maps/by-hash/{id}".format(id=level_id), headers=headers)
-            json = response.json()
-        except JSONDecodeError:
-            print("Failed to get level {} from Beat Saver.".format(level_id))
-            return None
-        return json
 
     def _get_level_dirname(self, level_scoresaber_dict):
         # levelAuthorName and name can contain characters invalid for file or directory names
