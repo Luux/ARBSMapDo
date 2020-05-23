@@ -169,7 +169,7 @@ class ConfigHandler:
                         response = response.replace(",", ".")
 
                     elif dst_type is Path:
-                        response = dir_script.joinpath(Path(input()))
+                        response = dir_script.joinpath(Path(response))
 
                     response = dst_type(response)
 
