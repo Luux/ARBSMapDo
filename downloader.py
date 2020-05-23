@@ -204,7 +204,7 @@ class advanced_downloader():
         
         def _filter_characteristic(characteristic):
             name = characteristic.get("name")
-            if name != self.gamemode:
+            if name != self.gamemode and self.gamemode is not None:
                 return False
 
             difficulties = characteristic.get("difficulties")
