@@ -35,7 +35,7 @@ class advanced_downloader():
         self.notes_max = config["notes_max"]
         self.nps_min = config["nps_min"]
         self.nps_max = config["nps_max"]
-        self.mode = config["mode"]
+        self.gamemode = config["gamemode"]
 
         self.beatsaver = beatsaver.BeatSaver()
 
@@ -204,7 +204,7 @@ class advanced_downloader():
         
         def _filter_characteristic(characteristic):
             name = characteristic.get("name")
-            if name != self.mode:
+            if name != self.gamemode:
                 return False
 
             difficulties = characteristic.get("difficulties")

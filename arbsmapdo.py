@@ -86,8 +86,8 @@ class ConfigHandler:
         if self.config.get("notes_max") is None:
             self.config["notes_max"] = sys.maxsize
 
-        if self.config.get("mode" is None):
-            self.config["mode"] = "Standard"
+        if self.config.get("gamemode" is None):
+            self.config["gamemode"] = "Standard"
 
         # Here comes everything the assistant will deal with
         if self.config.get("download_dir") is None:
@@ -121,13 +121,13 @@ class ConfigHandler:
         # so ARBSMapDo will only ask for mode if not ranked_only.
         # However, if you really want to do it, you can do this via command line or preset
         
-        if self.config.get("mode") is None and not self.config["ranked_only"]:
+        if self.config.get("gamemode") is None and not self.config["ranked_only"]:
             print("Filter by Game Mode? (default: None/No filtering)")
             for key in modes:
                 print("{} - {}".format(key, modes[key]))
             mode_num = self.get_validated_input(int, 0, choices=range(len(modes.values())))
             mode = modes[mode_num]
-            self.config["mode"] = mode
+            self.config["gamemode"] = mode
 
         if self.config.get("stars_min") is None:
             print("Minimum Stars? (Default: 0)")
@@ -218,7 +218,7 @@ if __name__ == "__main__":
     parser.add_argument("--nps_max", type=float, help="Maximum notes per second")
     parser.add_argument("--notes_min", type=int, help="Minimum total note count")
     parser.add_argument("--notes_max", type=int, help="Maximum total note count")
-    parser.add_argument("--mode", type=str, choices=list(modes.values()), help="Filter by mode.")
+    parser.add_argument("--gamemode", type=str, choices=list(modes.values()), help="Filter by game mode.")
     parser.add_argument("-s", "--skip_assistant", action="store_true",
                         help="Skip assistant except for neccessary things. You'll need to specify every argument via command line or preset")
     args = parser.parse_args()
