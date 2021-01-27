@@ -60,6 +60,7 @@ class Cache:
         # Update cache if neccessary
         if update:
             self._update_andruzzzhka_scrapes()
+            last_modified = time.time()
 
         # Load local Cache
         with open(self.local_cache_path, "r", encoding="UTF-8") as tmpfile:
