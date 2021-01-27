@@ -213,10 +213,14 @@ class advanced_downloader():
                     return True
 
 
-        bs_info = level["beatsaver_info"]
+        bs_info = level.get("beatsaver_info")
         if bs_info is None:
+            print("Skipping level due to missing beatsaver_info:\n{}".format(level))
             return False
-        bs_metadata = bs_info["metadata"]
+        bs_metadata = bs_info.get("metadata")
+        if bs_metadata is None:
+            print("Skipping Level due to missing metadata:\n{}".format(level))
+            return False
         bs_stats = bs_info["stats"]
         bs_upvotes = int(bs_stats["upVotes"])
         bs_downvotes = int(bs_stats["downVotes"])
