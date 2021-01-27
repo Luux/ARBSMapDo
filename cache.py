@@ -24,7 +24,7 @@ class Cache:
         self._cache_updated = False
         self.tmp_dir = Path(arbsmapdo_config["tmp_dir"])
         self.tmp_dir.mkdir(exist_ok=True)
-        self.local_cache_path = Path(arbsmapdo_config["beatsaver_cachefile"])
+        self.beatsaver_cachefile = Path(arbsmapdo_config["beatsaver_cachefile"])
 
         self._beatsaver_cache, self.local_cache_last_downloaded = self.load_beatsaver_cache_from_andruzzzhka_scrapes()
 
@@ -40,14 +40,14 @@ class Cache:
             zip_file.extractall(str(self.tmp_dir))
         
         # Replace old local cache by updated version
-        os.replace(self.tmp_dir.joinpath("beatSaverScrappedData.json"), self.local_cache_path)
+        os.replace(self.tmp_dir.joinpath("beatSaverScrappedData.json"), self.beatsaver_cachefile)
         last_updated = time.time()
         print("\nCache ready.")
 
     def load_beatsaver_cache_from_andruzzzhka_scrapes(self):
         # Check if update is neccessary
         update = False
-        if self.local_cache_path.is_file() is False:
+        if self.beatsaver_cachefile.is_file() is False:
             update = True
         else:
             last_modified = self.local_cache_path.stat().st_mtime
@@ -63,7 +63,7 @@ class Cache:
             last_modified = time.time()
 
         # Load local Cache
-        with open(self.local_cache_path, "r", encoding="UTF-8") as tmpfile:
+        with open(self.beatsaver_cachefile, "r", encoding="UTF-8") as tmpfile:
             scraped_cache_raw = json.load(tmpfile)
 
         cache_dict = dict()
