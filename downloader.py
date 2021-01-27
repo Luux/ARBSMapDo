@@ -57,7 +57,8 @@ class advanced_downloader():
         levels_to_download = self.fetch_and_filter()
 
         # Finally, download filtered Maps
-        self.download_levels(levels_to_download)
+        if len(levels_to_download) > 0:
+            self.download_levels(levels_to_download)
 
     def download_levels(self, levels: list):
         print("Downloading levels...")
@@ -132,7 +133,10 @@ class advanced_downloader():
 
                 if len(levels) == 0:
                     # Early Abort, no more songs with these filters -> Proceed to download stage
-                    print("Could not find more than {} levels under the given criteria.".format(len(download_list)))
+                    if len(download_list) == 0:
+                        print("Could not find any new levels under the given criteria.")
+                    else:
+                        print("Could not find more than {} levels under the given criteria.".format(len(download_list)))
                     return download_list
 
                 # ScoreSaber is faster, so we filter based on only scoresaber information first before accessing BeatSaver
