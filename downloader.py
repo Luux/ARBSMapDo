@@ -5,7 +5,7 @@ import string
 import progressbar
 import threading
 import zipfile
-import beatsaver
+import cache
 
 from inspect import getfile
 from pathlib import Path
@@ -37,7 +37,15 @@ class advanced_downloader():
         self.nps_max = config["nps_max"]
         self.gamemode = config["gamemode"]
 
-        self.beatsaver = beatsaver.BeatSaver()
+        # Initialize
+        self.cache = cache.Cache(config)
+
+
+    def clean_temp_dir(self):
+        try:
+            Path(self.tmp_dir).rmdir()
+        except:
+            print("WARNING: Error while cleaning up. Cannot delete tmp directory.")
 
     def start(self):
         # Create Download Directory if not existant
@@ -79,10 +87,7 @@ class advanced_downloader():
                         else:
                             i += 1
                 bar.update(finished)
-            try:
-                Path(self.tmp_dir).rmdir()
-            except:
-                print("WARNING: Error while cleaning up. Cannot delete tmp directory.")
+        self.clean_temp_dir()
 
     def _download_level(self, url, name):
 
@@ -148,7 +153,7 @@ class advanced_downloader():
                 print("Filtering candidates by info from beatsaver...")
                 with progressbar.ProgressBar(max_len=len(scoresaber_filtered_list), redirect_stdout=True) as bar:
                     for level in scoresaber_filtered_list:
-                        level["beatsaver_info"] = self.beatsaver.get_beatsaver_info(level["id"])
+                        level["beatsaver_info"] = self.cache.get_beatsaver_info(level["id"])
                         if self._filter_level_with_beatsaver_info(level) is True:
                             download_list.append(level)
                             print("Found Levels: {}/{}".format(len(download_list), self.levels_to_download))

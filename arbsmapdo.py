@@ -86,8 +86,11 @@ class ConfigHandler:
         if self.config.get("notes_max") is None:
             self.config["notes_max"] = sys.maxsize
 
-        if self.config.get("gamemode" is None):
+        if self.config.get("gamemode") is None:
             self.config["gamemode"] = "Standard"
+
+        if self.config.get("beatsaver_cachefile") is None:
+            self.config["beatsaver_cachefile"] = dir_script.joinpath("arbsmapdo_cache.json")
 
         # Here comes everything the assistant will deal with
         if self.config.get("download_dir") is None:
@@ -195,6 +198,7 @@ class ConfigHandler:
         path = dir_script.joinpath(Path(path))
         with open(path, "w+") as config_file:
             toml.dump(self.config, config_file)
+
 
 
 if __name__ == "__main__":
