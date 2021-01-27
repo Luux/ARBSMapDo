@@ -42,7 +42,7 @@ class Cache:
         # Replace old local cache by updated version
         os.replace(self.tmp_dir.joinpath("beatSaverScrappedData.json"), self.local_cache_path)
         last_updated = time.time()
-        print("Cache ready.")
+        print("\nCache ready.")
 
     def load_beatsaver_cache_from_andruzzzhka_scrapes(self):
         # Check if update is neccessary
