@@ -26,12 +26,25 @@ class Cache:
         self.tmp_dir.mkdir(exist_ok=True)
         self.local_cache_path = Path(arbsmapdo_config["beatsaver_cachefile"])
 
-        # Update cache if neccessary
-        self._update_andruzzzhka_scrapes()
-
-        self._beatsaver_cache = self.load_beatsaver_cache_from_andruzzzhka_scrapes()
+        self._beatsaver_cache, self.local_cache_last_downloaded = self.load_beatsaver_cache_from_andruzzzhka_scrapes()
 
     def _update_andruzzzhka_scrapes(self):
+        print("Updating Local BeatSaver Cache. This helps avoiding spamming the API hundreds of times.")
+        print("Downloading beatSaverScrappedData (helps to avoid spamming beatsaver API)...")
+
+        dl_filename = str(self.tmp_dir.joinpath("andruzzzhka_scrape.zip"))
+        wget.download(beatsaver_scraped_data_url, dl_filename)
+
+        # Unzip
+        with zipfile.ZipFile(str(dl_filename), "r") as zip_file:
+            zip_file.extractall(str(self.tmp_dir))
+        
+        # Replace old local cache by updated version
+        os.replace(self.tmp_dir.joinpath("beatSaverScrappedData.json"), self.local_cache_path)
+        last_updated = time.time()
+        print("Cache ready.")
+
+    def load_beatsaver_cache_from_andruzzzhka_scrapes(self):
         # Check if update is neccessary
         update = False
         if self.local_cache_path.is_file() is False:
@@ -43,23 +56,12 @@ class Cache:
             # Elapsed is given in seconds. The scrapes of andruzzzhka get updated once per day.
             if elapsed > 86400:
                 update = True 
-
+        
+        # Update cache if neccessary
         if update:
-            print("Updating Local BeatSaver Cache. This helps avoiding spamming the API hundreds of times.")
-            print("Downloading beatSaverScrappedData (helps to avoid spamming beatsaver API)...")
+            self._update_andruzzzhka_scrapes()
 
-            dl_filename = str(self.tmp_dir.joinpath("andruzzzhka_scrape.zip"))
-            wget.download(beatsaver_scraped_data_url, dl_filename)
-
-            # Unzip
-            with zipfile.ZipFile(str(dl_filename), "r") as zip_file:
-                zip_file.extractall(str(self.tmp_dir))
-            
-            # Replace old local cache by updated version
-            os.replace(self.tmp_dir.joinpath("beatSaverScrappedData.json"), self.local_cache_path)
-            print("Cache ready.")
-
-    def load_beatsaver_cache_from_andruzzzhka_scrapes(self):
+        # Load local Cache
         with open(self.local_cache_path, "r", encoding="UTF-8") as tmpfile:
             scraped_cache_raw = json.load(tmpfile)
 
@@ -67,12 +69,12 @@ class Cache:
         for levelinfo in scraped_cache_raw:
             cache_dict[levelinfo["hash"]] = levelinfo
 
-        return cache_dict
+        return cache_dict, last_modified
 
-    def _update_local_cache_file(self):
-        print("Saving local cache...")
-        with open(self.local_cache_path, "w+") as scrapedcache_fp:
-            json.dump(self._beatsaver_cache, scrapedcache_fp)
+    # def _update_local_cache_file(self):
+    #     print("Saving local cache...")
+    #     with open(self.local_cache_path, "w+") as scrapedcache_fp:
+    #         json.dump(self._beatsaver_cache, scrapedcache_fp)
 
     def _get_beatsaver_info_by_api(self, level_id):
         try:
