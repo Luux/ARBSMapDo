@@ -144,13 +144,13 @@ class ConfigHandler:
         # so ARBSMapDo will only ask for mode if not ranked_only.
         # However, if you really want to do it, you can do this via command line or preset
         
-        if self.config.get("gamemode") is None and not self.config["ranked_only"]:
-            print("Filter by Game Mode? (default: None/No filtering)")
-            for key in modes:
-                print("{} - {}".format(key, modes[key]))
-            mode_num = self.get_validated_input(int, 0, choices=range(len(modes.values())))
-            mode = modes[mode_num]
-            self.config["gamemode"] = mode
+        # if self.config.get("gamemode") is None and not self.config["ranked_only"]:
+        #     print("Filter by GameMode? (default: None/No filtering)")
+        #     for key in modes:
+        #         print("{} - {}".format(key, modes[key]))
+        #     mode_num = self.get_validated_input(int, 0, choices=range(len(modes.values())))
+        #     mode = modes[mode_num]
+        #     self.config["gamemode"] = mode
 
         if self.config.get("stars_min") is None:
             print("Minimum Stars? (Default: 0)")
