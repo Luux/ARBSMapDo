@@ -1,10 +1,15 @@
 from pathlib import Path
+import os
 import json
 import hashlib
 
 def calculate_Level_hash(levelPath):
     levelPath = Path(levelPath)
     infoPath = levelPath.joinpath("./info.dat")
+
+    if not infoPath.is_file():
+        print("info.dat at {} does not exist. Skipping. Note that this is not normal, please check the integrity of this level and consider re-downloading it.".format(levelPath))
+        return None
 
     with open(infoPath, "rb") as tmpfile:
         info_binary = tmpfile.read()
@@ -29,7 +34,7 @@ def calculate_Level_hash(levelPath):
                 hasher.update(diff_binary)
     
     # Calculate the final hash
-    sha1 = hasher.hexdigest()
+    sha1 = hasher.hexdigest().upper()
 
     return sha1
 

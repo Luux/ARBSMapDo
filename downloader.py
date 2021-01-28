@@ -51,14 +51,15 @@ class advanced_downloader():
         # Create Download Directory if not existant
         self.download_dir.mkdir(exist_ok=True)
 
-        self.already_downloaded = os.listdir(self.download_dir)
-
         # Crawl Scoresaber and filter
         levels_to_download = self.fetch_and_filter()
 
         # Finally, download filtered Maps
         if len(levels_to_download) > 0:
             self.download_levels(levels_to_download)
+        
+        # Save calculated hashes
+        self.cache.save_levelhash_cache()
 
     def download_levels(self, levels: list):
         print("Downloading levels...")
@@ -73,7 +74,10 @@ class advanced_downloader():
                 if(next_level_number < len(levels) and len(current_threads) < self.max_threads):
                     level = levels[next_level_number]
                     download_url = "https://beatsaver.com" + level["beatsaver_info"]["directDownload"]
+                    levelhash = level["id"]
                     name = self._get_level_dirname(level)
+                    self.cache.levelhash_cache[name] = levelhash
+
                     print("Downloading " + name)
                     thread = threading.Thread(target=self._download_level, args=[download_url, name])
                     current_threads.append(thread)
@@ -103,6 +107,7 @@ class advanced_downloader():
             zip_file.extractall(str(final_path))
         
         tmp_path.unlink()
+
 
     def fetch_and_filter(self):
         # fetching levels that will be downloaded from scoresaber
@@ -169,10 +174,8 @@ class advanced_downloader():
 
 
     def _filter_level_scoresaber_only(self, scoresaber_info, ids_to_filter):
-        dirname = self._get_level_dirname(scoresaber_info)
-
-            # filter already downloaded
-        if dirname in self.already_downloaded:
+        # filter already downloaded
+        if scoresaber_info["id"].upper() in self.cache.levelhash_cache.values():
             return False
 
         # Filter by difficulty

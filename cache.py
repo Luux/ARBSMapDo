@@ -4,6 +4,7 @@ import json
 import os
 import zipfile
 import time
+import utils
 
 from inspect import getfile
 from pathlib import Path, PurePath
@@ -24,9 +25,13 @@ class Cache:
         self._cache_updated = False
         self.tmp_dir = Path(arbsmapdo_config["tmp_dir"])
         self.tmp_dir.mkdir(exist_ok=True)
+        self.download_dir = Path(arbsmapdo_config["download_dir"])
         self.beatsaver_cachefile = Path(arbsmapdo_config["beatsaver_cachefile"])
+        self.levelhash_cachefile = Path(arbsmapdo_config["levelhash_cachefile"])
 
         self._beatsaver_cache, self.local_cache_last_downloaded = self.load_beatsaver_cache_from_andruzzzhka_scrapes()
+        self.levelhash_cache = self.load_levelhash_cache()
+        self.update_levelhash_cache()
 
     def _update_andruzzzhka_scrapes(self):
         print("Updating Local BeatSaver Cache. This helps avoiding spamming the API hundreds of times.")
@@ -99,7 +104,29 @@ class Cache:
 
         return info
 
+    def load_levelhash_cache(self):
+        if self.levelhash_cachefile.is_file():
+            with open(self.levelhash_cachefile, "r", encoding="UTF-8") as fp:
+                hashcache = json.load(fp)
+                return hashcache
+        else:
+            return dict()
     
+    def save_levelhash_cache(self):
+        # Save updates to the cachefile
+        with open(self.levelhash_cachefile, "w+", encoding="UTF-8") as fp:
+            json.dump(self.levelhash_cache, fp)
+
+    def update_levelhash_cache(self):
+        print("Scanning already existing maps...")
+        # Iterate over all directories in the download directory, scanning for already existing levels
+        for entry in self.download_dir.iterdir():
+            if entry.is_dir():
+               # For each directory (which is an entire mapdir), see if hash was already calculated
+               # If this is not the case -> calculate the hash and store to hashcache
+               if entry.name not in self.levelhash_cache.keys():
+                    levelhash = utils.calculate_Level_hash(self.download_dir.joinpath(entry.name))
+                    self.levelhash_cache[entry.name] = levelhash
 
 
 
