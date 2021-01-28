@@ -90,7 +90,8 @@ class ConfigHandler:
             self.config["gamemode"] = "Standard"
 
         if self.config.get("beatsaver_cachefile") is None:
-            self.config["beatsaver_cachefile"] = str(dir_script.joinpath("arbsmapdo_cache.json"))
+            # FIXME we shouldn't save this as an absolute path in the config as the ARBSMapDo folder might be moved
+            self.config["beatsaver_cachefile"] = str(dir_script.joinpath("arbsmapdo_cache.json")) 
 
         # Here comes everything the assistant will deal with
         if self.config.get("download_dir") is None:

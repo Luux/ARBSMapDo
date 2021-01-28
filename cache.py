@@ -50,7 +50,7 @@ class Cache:
         if self.beatsaver_cachefile.is_file() is False:
             update = True
         else:
-            last_modified = self.local_cache_path.stat().st_mtime
+            last_modified = self.beatsaver_cachefile.stat().st_mtime
             elapsed = time.time() - last_modified
 
             # Elapsed is given in seconds. The scrapes of andruzzzhka get updated once per day.
@@ -74,7 +74,7 @@ class Cache:
 
     # def _update_local_cache_file(self):
     #     print("Saving local cache...")
-    #     with open(self.local_cache_path, "w+") as scrapedcache_fp:
+    #     with open(self.beatsaver_cachefile, "w+") as scrapedcache_fp:
     #         json.dump(self._beatsaver_cache, scrapedcache_fp)
 
     def _get_beatsaver_info_by_api(self, level_id):
