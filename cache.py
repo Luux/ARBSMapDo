@@ -20,6 +20,14 @@ beatsaver_scraped_data_url = "https://raw.githubusercontent.com/andruzzzhka/Beat
 
 
 class Cache:
+    """
+    Caching makes things a lot faster.
+    1) BeatSaver cache: Allows using a data dump from BeatSaver so we don't have to call the API for each song. Updated once per day.
+    2) LevelHash cache: Don't calculate hashes for all existing songs each time we start ARBSMapDo.
+
+    Also handle cache misses.
+    """
+
     def __init__(self, arbsmapdo_config):
         self._beatsaver_cache = dict()
         self._cache_updated = False

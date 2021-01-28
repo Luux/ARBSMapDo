@@ -42,12 +42,15 @@ class advanced_downloader():
 
 
     def clean_temp_dir(self):
+        """Clean temp dir only if safe (directory is empty)"""
         try:
             Path(self.tmp_dir).rmdir()
         except:
             print("WARNING: Error while cleaning up. Cannot delete tmp directory.")
 
     def start(self):
+        """Starting the main functionality of ARBSMapDo"""
+
         # Create Download Directory if not existant
         self.download_dir.mkdir(exist_ok=True)
 
@@ -62,6 +65,8 @@ class advanced_downloader():
         self.cache.save_levelhash_cache()
 
     def download_levels(self, levels: list):
+        """Download a specific list of levels using multiple threads"""
+
         print("Downloading levels...")
         next_level_number = 0
         finished = 0
@@ -95,6 +100,7 @@ class advanced_downloader():
         self.clean_temp_dir()
 
     def _download_level(self, url, name):
+        """Threading helper function to download a single level"""
 
         data = requests.get(url, headers=headers)
         tmp_path = self.tmp_dir.joinpath(name + ".zip")
@@ -110,6 +116,12 @@ class advanced_downloader():
 
 
     def fetch_and_filter(self):
+        """
+        1) Scan scoresaber
+        2) Grab candidates
+        3) Scan BeatSaver data (and filter by it) for all candidates since only few information is available via ScoreSaber
+        4) Create final download list
+        """
         # fetching levels that will be downloaded from scoresaber
         # applies extended custom filtering according to given options
         requested_unfiltered = 0
@@ -257,6 +269,9 @@ class advanced_downloader():
         return True
 
     def _get_level_dirname(self, level_scoresaber_dict):
+        """
+        Choose a directory name for a level
+        """
         # levelAuthorName and name can contain characters invalid for file or directory names
         # we need to filter them out
         valid_chars = "-_() %s%s" % (string.ascii_letters, string.digits)
@@ -271,6 +286,8 @@ class advanced_downloader():
         )
 
     def _call_scoresaber_api(self, page, limit):
+        """Call the ScoreSaber-API I guess?"""
+
         ranked_only = 1 if self.ranked_only else 0
         response = requests.get("https://scoresaber.com/api.php?function=get-leaderboards&cat={cat}&page={page}&limit={limit}&ranked={ranked_only}"
                                 .format(cat=self.scoresaber_sorting, page=page, limit=limit, ranked_only=ranked_only),

@@ -27,8 +27,20 @@ modes = {
     }
 
 class ConfigHandler:
+    """
+    ARBSMapDo can be used in 3 different ways:
+    1) Using the Interactive Assistant
+    2) Via Command Line Arguments
+    3) Passing a Configuration file
+    These three approaches can be mixed altogether, where Config File > CL Args > Interactive
+    However, as so many configuration variants can become quite messy to implement, there's a ConfigHandler
+    which serves as a single "Point-of-Trust" and manages all of this. This results in a single final configuration dictionary
+    that is used by the other components of ARBSMapDo.
+    """
 
     def __init__(self, args):
+        """Just some initialization. Also prepares the hierachy explained above."""
+
         # Non-"None" Arguments passed overwrite the preset
         args_dict = vars(args)
         preset_config = None
@@ -57,6 +69,11 @@ class ConfigHandler:
 
 
     def missing_argument_assistant(self):
+        """
+        The interactive assistant covers options that are not passed via config file/CL.
+        This is also the "just-run-it" variant, as you don't have to mess around with CL arguments.
+        Of course, we need to validate user inputs as well.
+        """
         # Kinda ugly. But processing user input config stuff will always be.
 
         # Extended options that are only available via command line or presets
@@ -163,6 +180,9 @@ class ConfigHandler:
 
 
     def get_validated_input(self, dst_type, default=None, choices=None, min_value=None, max_value=None, skippable=True):
+        """
+        Used to validate User Inputs and perform some normalization.
+        """
         if self.config["skip_assistant"] and skippable:
             return default
         while True:
@@ -198,6 +218,8 @@ class ConfigHandler:
                     continue
 
     def save_config(self, path: str):
+        """Can be used to save a configuration file"""
+
         path = dir_script.joinpath(Path(path))
         with open(path, "w+") as config_file:
             toml.dump(self.config, config_file)
