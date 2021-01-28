@@ -2,7 +2,7 @@ from pathlib import Path
 import json
 import hashlib
 
-def calcLevelHash(levelPath):
+def calculate_Level_hash(levelPath):
     levelPath = Path(levelPath)
     infoPath = levelPath.joinpath("./info.dat")
 
