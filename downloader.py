@@ -147,6 +147,9 @@ class advanced_downloader():
     def download_levels(self, levels: list):
         """Download a specific list of levels using multiple threads"""
 
+        if len(levels) == 0:
+            return
+
         print("Downloading levels...")
         next_level_number = 0
         finished = 0
