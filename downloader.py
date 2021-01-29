@@ -108,8 +108,8 @@ class advanced_downloader():
             self.download_levels(levels_to_download)
 
             # As soon as every level is downloaded, move bplist to playlist folder
-            shutil.move(str(bplist_path), str(self.playlist_dir.joinpath(bplist_path.name)))
-            print("Installed Playlist: {}".format(filename))
+            shutil.copy(str(bplist_path), str(self.playlist_dir.joinpath(bplist_path.name)))
+            print("Installed Playlist: {}".format(bplist_path.name))
         
     
 
