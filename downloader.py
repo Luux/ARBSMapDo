@@ -32,7 +32,7 @@ class advanced_downloader():
         self.URIs = config["URIs"]
 
         # Only when filtering
-        if self.URIs is None:
+        if self.URIs == []:
             self.ranked_only = config["ranked_only"]
             self.scoresaber_sorting = config["scoresaber_sorting"]
             self.levels_to_download = config["levels_to_download"]
