@@ -234,15 +234,22 @@ class ConfigHandler:
     def save_config(self, path: str):
         """Can be used to save a configuration file"""
 
+        # Things such as the URI should not be saved. Filter them.
+        exclude = ["URI", "preset"]
+        filtered_config = dict()
+        for key in self.config.keys():
+            if key not in exclude:
+                filtered_config[key] = self.config[key]
+
         path = dir_script.joinpath(Path(path))
         with open(path, "w+") as config_file:
-            toml.dump(self.config, config_file)
+            toml.dump(filtered_config, config_file)
 
 
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("URI", default=None, help="URI (Path or URL) to map or playlist (*.bplist). ARBSMapDo will download and install the specified map/list.")
+    parser.add_argument("URI", nargs="?", default=None, help="URI (Path or URL) to map or playlist (*.bplist). ARBSMapDo will download and install the specified map/list.")
     parser.add_argument("--preset", default=default_config_name, help="Path to the preset to use (default: {}".format(default_config_name))
     parser.add_argument("-levels", "--levels_to_download", type=int, help="Number of levels to download. One level may have multiple difficulties!")
     parser.add_argument("--stars_min", type=int, help="Minimum star difficulty for ranked maps")

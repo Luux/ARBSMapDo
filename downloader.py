@@ -273,7 +273,7 @@ class advanced_downloader():
 
     def _filter_level_scoresaber_only(self, scoresaber_info, ids_to_filter):
         # filter already downloaded
-        if self.does_map_already_exist(scoresaber_info["id"]):
+        if self.does_level_already_exist(scoresaber_info["id"]):
             return False
 
         # Filter by difficulty
