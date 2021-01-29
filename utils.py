@@ -1,11 +1,14 @@
 from pathlib import Path
 from enum import Enum
 from urllib.parse import urlparse
+from bs4 import BeautifulSoup
 
 import urllib3
 import os
 import json
 import hashlib
+import requests
+import re
 
 class URI_type(Enum):
     unknown = 0
@@ -93,12 +96,22 @@ def get_level_key_from_url(map_url, resource_type):
         # TODO
         return NotImplementedError
 
-
+def get_level_hashes_from_playlist(self, bplist_path):
+    with open(bplist_path, encoding="utf-8") as fp:
+        playlist = json.load(fp)
     
+    hashes = []
+    for level in playlist["songs"]:
+        hashes.append(level["hash"])
+    
+    return hashes
 
+def get_bsaber_bplist(baseurl):
+    request = requests.get(baseurl)
+    soup = BeautifulSoup(request.text, "html.parser")
 
-#print(get_map_or_playlist_resource_type("https://beatsaver.com/beatmap/26d2"))
-
-url = "https://bsaber.com/songs/133ee/"
-print(get_level_key_from_url(url, get_map_or_playlist_resource_type(url)))
-
+    dl_button = soup.find("a", href=re.compile(r"/PlaylistAPI/"))
+    dl_url = dl_button.attrs.get("href")
+    
+    absolute_url = "https://bsaber.com" + dl_url
+    return absolute_url
