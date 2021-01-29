@@ -1,7 +1,23 @@
 from pathlib import Path
+from enum import Enum
+from urllib.parse import urlparse
+
+import urllib3
 import os
 import json
 import hashlib
+
+class URI_type(Enum):
+    unknown = 0
+    map_file = 1
+    map_scoresaber = 2
+    map_beatsaver = 3
+    map_beatsaver_oneclick = 4
+    map_beatsaver_key = 5
+    map_bsaber = 6
+    playlist_file = 7
+    playlist_bsaber = 8
+
 
 def calculate_Level_hash(levelPath):
     levelPath = Path(levelPath)
@@ -38,4 +54,51 @@ def calculate_Level_hash(levelPath):
 
     return sha1
 
+
+def get_map_or_playlist_resource_type(input_string):
+    if os.path.exists(input_string):
+        uri_path = Path(input_string)
+        if not uri_path.is_file:
+            return URI_type.unknown
+        if uri_path.suffix == ".zip":
+            return URI_type.map_file
+        if uri_path.suffix == ".bplist":
+            return URI_type.playlist_file
+    
+    parsed = urlparse(input_string)
+    if parsed.hostname == "beatsaver.com":
+        if parsed.scheme == "beatsaver":
+            return URI_type.map_beatsaver_oneclick
+        return URI_type.map_beatsaver
+
+    
+    if parsed.hostname == "bsaber.com":
+        if parsed.path.split("/")[1] == "songs":
+            return URI_type.map_bsaber
+        else:
+            # WARNING really unverified here
+            return URI_type.playlist_bsaber
+    
+
+def get_level_key_from_url(map_url, resource_type):
+    parsed = urlparse(map_url)
+
+    if resource_type is URI_type.map_beatsaver or resource_type is URI_type.map_bsaber:
+        split = parsed.path.split("/")
+        # URL may be https://beatsaver.com/beatmap/whatever or https://beatsaver.com/beatmap/whatever/
+        key = split[-1] if split[-1] != "" else split[-2]
+        return key
+    
+    if resource_type is URI_type.map_scoresaber:
+        # TODO
+        return NotImplementedError
+
+
+    
+
+
+#print(get_map_or_playlist_resource_type("https://beatsaver.com/beatmap/26d2"))
+
+url = "https://bsaber.com/songs/133ee/"
+print(get_level_key_from_url(url, get_map_or_playlist_resource_type(url)))
 

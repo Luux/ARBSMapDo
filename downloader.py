@@ -6,39 +6,62 @@ import progressbar
 import threading
 import zipfile
 import cache
+import utils
 
 from inspect import getfile
 from pathlib import Path
 from json import JSONDecodeError
 
+
 dir_script = Path(getfile(lambda: 0)).parent
 
 headers = {"User-Agent": "ARBSMapDo V1"}
+
+
 
 class advanced_downloader():
     def __init__(self, config: dict):
         
         self.download_dir = Path(config["download_dir"])
-        self.ranked_only = config["ranked_only"]
-        self.scoresaber_sorting = config["scoresaber_sorting"]
-        self.levels_to_download = config["levels_to_download"]
-        self.scoresaber_maxlimit = config["scoresaber_maxlimit"]
         self.tmp_dir = dir_script.joinpath(config["tmp_dir"])
         self.max_threads = config["max_threads"]
-        self.stars_min = config["stars_min"]
-        self.stars_max = config["stars_max"]
-        self.vote_ratio_min = config["vote_ratio_min"]
-        self.vote_ratio_max = config["vote_ratio_max"]
-        self.length_min = config["length_min"]
-        self.length_max = config["length_max"]
-        self.notes_min = config["notes_min"]
-        self.notes_max = config["notes_max"]
-        self.nps_min = config["nps_min"]
-        self.nps_max = config["nps_max"]
-        self.gamemode = config["gamemode"]
+        self.URI = config["URI"]
+
+
+        # Only when filtering
+        if self.URI is None:
+            self.ranked_only = config["ranked_only"]
+            self.scoresaber_sorting = config["scoresaber_sorting"]
+            self.levels_to_download = config["levels_to_download"]
+            self.scoresaber_maxlimit = config["scoresaber_maxlimit"]
+            self.stars_min = config["stars_min"]
+            self.stars_max = config["stars_max"]
+            self.vote_ratio_min = config["vote_ratio_min"]
+            self.vote_ratio_max = config["vote_ratio_max"]
+            self.length_min = config["length_min"]
+            self.length_max = config["length_max"]
+            self.notes_min = config["notes_min"]
+            self.notes_max = config["notes_max"]
+            self.nps_min = config["nps_min"]
+            self.nps_max = config["nps_max"]
+            self.gamemode = config["gamemode"]
+        else:
+            self.URI_type = utils.get_map_or_playlist_resource_type(self.URI)
 
         # Initialize
         self.cache = cache.Cache(config)
+
+    def install_from_URI(self, URI):
+        if self.URI_type in [utils.URI_type.map_beatsaver, utils.URI_type.map_bsaber]:
+            level_key = utils.get_level_key_from_url(self.URI, self.URI_type)
+            level_dict = dict()
+
+            # Keys do not rely on the actual cache functionality
+            # but the API calls are almost identical, that's why cache.get_beatsaver_info handles hashes AND keys
+            level_dict["beatsaver_info"] = self.cache.get_beatsaver_info(level_key)
+
+            # We got everything we need, so let's go
+            self.download_levels([level_dict])
 
 
     def clean_temp_dir(self):
@@ -54,12 +77,17 @@ class advanced_downloader():
         # Create Download Directory if not existant
         self.download_dir.mkdir(exist_ok=True)
 
-        # Crawl Scoresaber and filter
-        levels_to_download = self.fetch_and_filter()
+        # Search & Filter...
+        if self.URI is None:
+            # Crawl Scoresaber and filter
+            levels_to_download = self.fetch_and_filter()
 
-        # Finally, download filtered Maps
-        if len(levels_to_download) > 0:
-            self.download_levels(levels_to_download)
+            # Finally, download filtered Maps
+            if len(levels_to_download) > 0:
+                self.download_levels(levels_to_download)
+        else:
+            # ...or install directly
+            self.install_from_URI(self.URI)
         
         # Save calculated hashes
         self.cache.save_levelhash_cache()
@@ -79,7 +107,7 @@ class advanced_downloader():
                 if(next_level_number < len(levels) and len(current_threads) < self.max_threads):
                     level = levels[next_level_number]
                     download_url = "https://beatsaver.com" + level["beatsaver_info"]["directDownload"]
-                    levelhash = level["id"]
+                    levelhash = level["beatsaver_info"]["_id"]
                     name = self._get_level_dirname(level)
                     self.cache.levelhash_cache[name] = levelhash
 
@@ -276,11 +304,11 @@ class advanced_downloader():
         # we need to filter them out
         valid_chars = "-_() %s%s" % (string.ascii_letters, string.digits)
 
-        author = "".join(c for c in level_scoresaber_dict["levelAuthorName"] if c in valid_chars).replace(" ", "-")
-        levelname = "".join(c for c in level_scoresaber_dict["name"] if c in valid_chars).replace(" ", "-")
+        author = "".join(c for c in level_scoresaber_dict["beatsaver_info"]["metadata"]["levelAuthorName"] if c in valid_chars).replace(" ", "-")
+        levelname = "".join(c for c in level_scoresaber_dict["beatsaver_info"]["name"] if c in valid_chars).replace(" ", "-")
 
         return "{id}_{author}_{levelname}".format(
-            id=level_scoresaber_dict["id"],
+            id=level_scoresaber_dict["beatsaver_info"]["_id"],
             author=author,
             levelname=levelname
         )

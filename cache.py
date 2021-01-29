@@ -20,14 +20,6 @@ beatsaver_scraped_data_url = "https://raw.githubusercontent.com/andruzzzhka/Beat
 
 
 class Cache:
-    """
-    Caching makes things a lot faster.
-    1) BeatSaver cache: Allows using a data dump from BeatSaver so we don't have to call the API for each song. Updated once per day.
-    2) LevelHash cache: Don't calculate hashes for all existing songs each time we start ARBSMapDo.
-
-    Also handle cache misses.
-    """
-
     def __init__(self, arbsmapdo_config):
         self._beatsaver_cache = dict()
         self._cache_updated = False
@@ -36,7 +28,6 @@ class Cache:
         self.download_dir = Path(arbsmapdo_config["download_dir"])
         self.beatsaver_cachefile = Path(arbsmapdo_config["beatsaver_cachefile"])
         self.levelhash_cachefile = Path(arbsmapdo_config["levelhash_cachefile"])
-        self.force_rescan = arbsmapdo_config["rescan"]
 
         self._beatsaver_cache, self.local_cache_last_downloaded = self.load_beatsaver_cache_from_andruzzzhka_scrapes()
         self.levelhash_cache = self.load_levelhash_cache()
@@ -93,28 +84,38 @@ class Cache:
 
     def _get_beatsaver_info_by_api(self, level_id):
         try:
-            response = requests.get("https://beatsaver.com/api/maps/by-hash/{id}".format(id=level_id), headers=headers)
+            if len(level_id) == 40:
+                # Is sha1-hash
+                response = requests.get("https://beatsaver.com/api/maps/by-hash/{id}".format(id=level_id), headers=headers)
+            else:
+                # Treat as level key
+                response = requests.get("https://beatsaver.com/api/maps/detail/{id}".format(id=level_id), headers=headers)
             json = response.json()
         except JSONDecodeError:
             print("Failed to get level {} from Beat Saver.".format(level_id))
             return None
         return json
     
-    def get_beatsaver_info(self, level_hash):
-        level_hash = level_hash.lower()
+    def get_beatsaver_info(self, level_id):
+        """
+        Uses information from the cache (hashes only) or calls the beatsaver API (hashes & keys)
+        """
+
+        level_hash = level_id.lower()
         info = self._beatsaver_cache.get(level_hash)
 
         if info is None:
-            info = self._get_beatsaver_info_by_api(level_hash)
+            info = self._get_beatsaver_info_by_api(level_id)
 
-            if info is not None:
-                self._beatsaver_cache[level_hash] = info
+            # Cache is only for hashes
+            if info is not None and len(level_id) == 40:
+                self._beatsaver_cache[level_id] = info
                 self._cache_updated = True
 
         return info
 
     def load_levelhash_cache(self):
-        if self.levelhash_cachefile.is_file() and self.force_rescan is False:
+        if self.levelhash_cachefile.is_file():
             with open(self.levelhash_cachefile, "r", encoding="UTF-8") as fp:
                 hashcache = json.load(fp)
                 return hashcache
