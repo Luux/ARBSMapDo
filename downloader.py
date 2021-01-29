@@ -108,7 +108,7 @@ class advanced_downloader():
             self.download_levels(levels_to_download)
 
             # As soon as every level is downloaded, move bplist to playlist folder
-            shutil.move(str(bplist_path), str(self.playlist_dir))
+            shutil.move(str(bplist_path), str(self.playlist_dir.joinpath(bplist_path.name)))
             print("Installed Playlist: {}".format(filename))
         
     
@@ -116,7 +116,7 @@ class advanced_downloader():
     def clean_temp_dir(self):
         """Clean temp dir only if safe (directory is empty)"""
         try:
-            Path(self.tmp_dir).rmdir()
+            shutil.rmtree(self.tmp_dir)
         except:
             print("WARNING: Error while cleaning up. Cannot delete tmp directory.")
 
@@ -140,6 +140,9 @@ class advanced_downloader():
         
         # Save calculated hashes
         self.cache.save_levelhash_cache()
+
+        # Cleanup
+        self.clean_temp_dir()
 
     def download_levels(self, levels: list):
         """Download a specific list of levels using multiple threads"""
@@ -174,7 +177,6 @@ class advanced_downloader():
                         else:
                             i += 1
                 bar.update(finished)
-        self.clean_temp_dir()
 
     def _download_level(self, url, name):
         """Threading helper function to download a single level"""
