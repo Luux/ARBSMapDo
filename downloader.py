@@ -7,7 +7,10 @@ import threading
 import zipfile
 import cache
 import utils
+import shutil
 
+
+from bs4 import BeautifulSoup
 from inspect import getfile
 from pathlib import Path
 from json import JSONDecodeError
@@ -23,6 +26,7 @@ class advanced_downloader():
     def __init__(self, config: dict):
         
         self.download_dir = Path(config["download_dir"])
+        self.playlist_dir = Path(config["playlist_dir"])
         self.tmp_dir = dir_script.joinpath(config["tmp_dir"])
         self.max_threads = config["max_threads"]
         self.URI = config["URI"]
@@ -52,6 +56,7 @@ class advanced_downloader():
         self.cache = cache.Cache(config)
 
     def install_from_URI(self, URI):
+        # Handle single level url...
         if self.URI_type in [utils.URI_type.map_beatsaver, utils.URI_type.map_bsaber]:
             level_key = utils.get_level_key_from_url(self.URI, self.URI_type)
             level_dict = dict()
@@ -64,11 +69,49 @@ class advanced_downloader():
                 print("Level already exists. Skipping.")
                 return
             
+
             level_dict["beatsaver_info"] = beatsaver_info
 
             # We got everything we need, so let's go
             self.download_levels([level_dict])
 
+        # ...OR handle entire playlist
+        elif self.URI_type in [utils.URI_type.playlist_file, utils.URI_type.playlist_bsaber]:
+
+            levels_to_download = []
+            bplist_path = None
+
+            if self.URI_type is utils.URI_type.playlist_file:
+                bplist_path = Path(URI)
+            if self.URI_type is utils.URI_type.playlist_bsaber:
+                # Download corresponding bplist
+                bplist_url = utils.extract_bsaber_bplist_url(self.URI)
+                print("Extracting playlist {}".format(bplist_url))
+                filename = bplist_url.split("/")[-1]
+                data = requests.get(bplist_url, headers=headers)
+                bplist_path = self.tmp_dir.joinpath(filename)
+
+                with open(str(bplist_path), "wb+") as tmp:
+                    tmp.write(data.content)
+
+            level_hashes = utils.get_level_hashes_from_playlist(bplist_path)
+
+            for level_hash in level_hashes:
+                if not self.does_level_already_exist(level_hash):
+                    beatsaver_info = self.cache.get_beatsaver_info(level_hash)
+                    level = dict()
+                    level["beatsaver_info"] = beatsaver_info
+                    levels_to_download.append(level)
+            if len(levels_to_download) < len(level_hashes):
+                print("{} levels of the specified playlist have already been downloaded. These will be skipped.".format(len(level_hashes) - len(levels_to_download)))
+            print("Downloading {} new levels.".format(len(levels_to_download)))
+            self.download_levels(levels_to_download)
+
+            # As soon as every level is downloaded, move bplist to playlist folder
+            shutil.move(str(bplist_path), str(self.playlist_dir))
+            print("Installed Playlist: {}".format(filename))
+        
+    
 
     def clean_temp_dir(self):
         """Clean temp dir only if safe (directory is empty)"""

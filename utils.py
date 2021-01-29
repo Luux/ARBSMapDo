@@ -96,7 +96,7 @@ def get_level_key_from_url(map_url, resource_type):
         # TODO
         return NotImplementedError
 
-def get_level_hashes_from_playlist(self, bplist_path):
+def get_level_hashes_from_playlist(bplist_path):
     with open(bplist_path, encoding="utf-8") as fp:
         playlist = json.load(fp)
     
@@ -106,7 +106,7 @@ def get_level_hashes_from_playlist(self, bplist_path):
     
     return hashes
 
-def get_bsaber_bplist(baseurl):
+def extract_bsaber_bplist_url(baseurl):
     request = requests.get(baseurl)
     soup = BeautifulSoup(request.text, "html.parser")
 
