@@ -81,7 +81,6 @@ class ConfigHandler:
 
         if self.config.get("download_dir") is None:
             print("Download directory not yet specified. Please input the download directory (usually '[BeatSaberPath]\\Beat Saber_Data\\CustomLevels').")
-            print("This will be saved to the preset if specified or to the default preset.")
             download_dir = self.get_validated_input(Path, skippable=False).absolute()
             self.config["download_dir"] = str(download_dir)
         
@@ -90,8 +89,7 @@ class ConfigHandler:
 
         if self.config.get("playlist_dir") is None:
             playlist_path = Path(self.config["download_dir"]).joinpath("../../Playlists/").resolve()
-            print("Playlists will be saved at {}. If this is correct, confirm with [ENTER], else specify a custom path below.".format(playlist_path.absolute()))
-            print("This will be also saved to the current preset.")
+            print("\nPlaylists will be saved at {}. If this is correct, confirm with [ENTER], else specify a custom path below.".format(playlist_path.absolute()))
             playlist_path = self.get_validated_input(Path, skippable=True, default=playlist_path).resolve().absolute()
             self.config["playlist_dir"] = str(playlist_path)
             # write the path to the used preset if it's not set at all
