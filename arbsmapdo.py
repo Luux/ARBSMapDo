@@ -201,7 +201,7 @@ class ConfigHandler:
             return default
         while True:
             response = input()
-            if response is "" and default is not None:
+            if response == "" and default is not None:
                 return default
             else:
                 try:
