@@ -125,7 +125,7 @@ class advanced_downloader():
                 local_bplists.append(bplist_path)
 
                 print("Downloading {} new levels.".format(len(levels_to_download)))
-
+        print("")
         self.download_levels(levels_to_download)
 
         # As soon as every level is downloaded, move bplist to playlist folder
