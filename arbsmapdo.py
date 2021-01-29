@@ -82,10 +82,22 @@ class ConfigHandler:
         if self.config.get("download_dir") is None:
             print("Download directory not yet specified. Please input the download directory (usually '[BeatSaberPath]\\Beat Saber_Data\\CustomLevels').")
             print("This will be saved to the preset if specified or to the default preset.")
-            self.config["download_dir"] = str(self.get_validated_input(Path, skippable=False).absolute())
-
+            download_dir = self.get_validated_input(Path, skippable=False).absolute()
+            self.config["download_dir"] = str(download_dir)
+        
             # write the path to the used preset if it's not set at all
             self.save_config(default_config_name)
+
+        if self.config.get("playlist_dir") is None:
+            playlist_path = Path(self.config["download_dir"]).joinpath("../../Playlists/").resolve()
+            print("Playlists will be saved at {}. If this is correct, confirm with [ENTER], else specify a custom path below.".format(playlist_path.absolute()))
+            print("This will be also saved to the current preset.")
+            playlist_path = self.get_validated_input(Path, skippable=True, default=playlist_path).resolve().absolute()
+            self.config["playlist_dir"] = str(playlist_path)
+            # write the path to the used preset if it's not set at all
+            self.save_config(default_config_name)
+
+            
 
         if self.config.get("vote_ratio_max") is None:
             self.config["vote_ratio_max"] = 1
@@ -239,6 +251,7 @@ if __name__ == "__main__":
     parser.add_argument("--scoresaber_sorting", type=int, choices=[0, 1, 2], help="Scoresaber Sorting Mode. Choices: 0 - Trends, 1 - Date Ranked, 2 - Scores Set, 3 - Star Difficulty")
     parser.add_argument("--tmp_dir", type=Path, help="Temporary download dir (default: './download/')")
     parser.add_argument("--download_dir", type=Path, help="Final download folder where custom levels get extracted (usually '[BeatSaberPath]\\Beat Saber_Data\\CustomLevels')")
+    parser.add_argument("--playlist_dir", type=Path, help="Directory where playlist files will be saved at (usually '[BeatSaberPath]\\Playlists')")
     parser.add_argument("--max_threads", type=int, help="Maximim thread count to use for downloading.")
     parser.add_argument("--scoresaber_maxlimit", type=int, help="Maximum maps per 'page' for Scoresaber API. (You usually don't have to change this.)")
     parser.add_argument("--save_preset", type=Path, help="Save specified settings into given file. You can load it next time by using --preset")
