@@ -29,11 +29,10 @@ class advanced_downloader():
         self.playlist_dir = Path(config["playlist_dir"])
         self.tmp_dir = dir_script.joinpath(config["tmp_dir"])
         self.max_threads = config["max_threads"]
-        self.URI = config["URI"]
-
+        self.URIs = config["URIs"]
 
         # Only when filtering
-        if self.URI is None:
+        if self.URIs is None:
             self.ranked_only = config["ranked_only"]
             self.scoresaber_sorting = config["scoresaber_sorting"]
             self.levels_to_download = config["levels_to_download"]
@@ -49,69 +48,90 @@ class advanced_downloader():
             self.nps_min = config["nps_min"]
             self.nps_max = config["nps_max"]
             self.gamemode = config["gamemode"]
-        else:
-            self.URI_type = utils.get_map_or_playlist_resource_type(self.URI)
 
         # Initialize
         self.cache = cache.Cache(config)
 
-    def install_from_URI(self, URI):
-        # Handle single level url...
-        if self.URI_type is utils.URI_type.unknown:
-            raise NotImplementedError("URI not recognized. This type of content may not be implemented for direct DL yet. Please try downloading the song/playlist manually.")
-        if self.URI_type in [utils.URI_type.map_beatsaver, utils.URI_type.map_bsaber, utils.URI_type.map_scoresaber]:
-            level_key = utils.get_level_id_from_url(self.URI, self.URI_type)
-            level_dict = dict()
+    def install_from_URIs(self, URIs):
+        levels_to_download = []
+        local_bplists = []
 
-            # Keys do not rely on the actual cache functionality
-            # but the API calls are almost identical, that's why cache.get_beatsaver_info handles hashes AND keys
-            beatsaver_info = self.cache.get_beatsaver_info(level_key)
+        def check_for_duplicates(level_id):
+            # Check for duplicates during the current session
+             # May occur when downloading multiple playlists
+            for other_level in levels_to_download:
+                if other_level["beatsaver_info"]["_id"].upper() == level_id.upper():
+                    return True
+            return False
 
-            if self.does_level_already_exist(beatsaver_info["_id"]):
-                print("Level already exists. Skipping.")
-                return
-            
+        for URI in URIs:
+            URI_type = utils.get_map_or_playlist_resource_type(URI)
 
-            level_dict["beatsaver_info"] = beatsaver_info
+            # Handle single level url...
+            if URI_type is utils.URI_type.unknown:
+                print("URI {} not recognized. This type of content may not be implemented for direct DL yet. Please try downloading the song/playlist manually."
+                                          .format(URI))
+                next
+            if URI_type in [utils.URI_type.map_beatsaver, utils.URI_type.map_bsaber, utils.URI_type.map_scoresaber]:
+                level_key = utils.get_level_id_from_url(URI, URI_type)
+                level_dict = dict()
 
-            # We got everything we need, so let's go
-            self.download_levels([level_dict])
+                # Keys do not rely on the actual cache functionality
+                # but the API calls are almost identical, that's why cache.get_beatsaver_info handles hashes AND keys
+                beatsaver_info = self.cache.get_beatsaver_info(level_key)
 
-        # ...OR handle entire playlist
-        elif self.URI_type in [utils.URI_type.playlist_file, utils.URI_type.playlist_bsaber]:
+                level_id = beatsaver_info["_id"]
+                # Check if level is already installed
+                if self.does_level_already_exist(level_id):
+                    print("Level {} already exists. Skipping.".format(level_id))
+                    next
+                else:
+                    
+                    if not check_for_duplicates(level_id):    
+                        level_dict["beatsaver_info"] = beatsaver_info
+                        levels_to_download.append(level_dict)
 
-            levels_to_download = []
-            bplist_path = None
+            # ...OR handle entire playlist
+            elif URI_type in [utils.URI_type.playlist_file, utils.URI_type.playlist_bsaber]:
 
-            if self.URI_type is utils.URI_type.playlist_file:
-                bplist_path = Path(URI)
-            if self.URI_type is utils.URI_type.playlist_bsaber:
-                # Download corresponding bplist
-                bplist_url = utils.extract_bsaber_bplist_url(self.URI)
-                print("Extracting playlist {}".format(bplist_url))
-                filename = bplist_url.split("/")[-1]
-                data = requests.get(bplist_url, headers=headers)
-                bplist_path = self.tmp_dir.joinpath(filename)
+                levels_to_download = []
+                bplist_path = None
 
-                with open(str(bplist_path), "wb+") as tmp:
-                    tmp.write(data.content)
+                if URI_type is utils.URI_type.playlist_file:
+                    bplist_path = Path(URI)
+                if URI_type is utils.URI_type.playlist_bsaber:
+                    # Download corresponding bplist
+                    bplist_url = utils.extract_bsaber_bplist_url(URI)
+                    print("Extracting playlist {}".format(bplist_url))
+                    filename = bplist_url.split("/")[-1]
+                    data = requests.get(bplist_url, headers=headers)
+                    bplist_path = self.tmp_dir.joinpath(filename)
 
-            level_hashes = utils.get_level_hashes_from_playlist(bplist_path)
+                    with open(str(bplist_path), "wb+") as tmp:
+                        tmp.write(data.content)
 
-            for level_hash in level_hashes:
-                if not self.does_level_already_exist(level_hash):
-                    beatsaver_info = self.cache.get_beatsaver_info(level_hash)
-                    level = dict()
-                    level["beatsaver_info"] = beatsaver_info
-                    levels_to_download.append(level)
-            if len(levels_to_download) < len(level_hashes):
-                print("{} levels of the specified playlist have already been downloaded. These will be skipped.".format(len(level_hashes) - len(levels_to_download)))
-            print("Downloading {} new levels.".format(len(levels_to_download)))
-            self.download_levels(levels_to_download)
+                level_hashes = utils.get_level_hashes_from_playlist(bplist_path)
 
-            # As soon as every level is downloaded, move bplist to playlist folder
-            shutil.copy(str(bplist_path), str(self.playlist_dir.joinpath(bplist_path.name)))
+                for level_hash in level_hashes:
+                    if not self.does_level_already_exist(level_hash) and not check_for_duplicates(level_hash):
+                        beatsaver_info = self.cache.get_beatsaver_info(level_hash)
+                        level = dict()
+                        level["beatsaver_info"] = beatsaver_info
+                        levels_to_download.append(level)
+                if len(levels_to_download) < len(level_hashes):
+                    print("{} levels of the specified playlist have already been downloaded. These will be skipped.".format(len(level_hashes) - len(levels_to_download)))
+                
+                local_bplists.append(bplist_path)
+
+                print("Downloading {} new levels.".format(len(levels_to_download)))
+
+        self.download_levels(levels_to_download)
+
+        # As soon as every level is downloaded, move bplist to playlist folder
+        for bplist in local_bplists:
+            shutil.copy(str(bplist), str(self.playlist_dir.joinpath(bplist.name)))
             print("Installed Playlist: {}".format(bplist_path.name))
+        print("Done!")
 
     def clean_temp_dir(self):
         """Clean temp dir only if safe (directory is empty)"""
@@ -127,7 +147,7 @@ class advanced_downloader():
         self.download_dir.mkdir(exist_ok=True)
 
         # Search & Filter...
-        if self.URI is None:
+        if self.URIs == []:
             # Crawl Scoresaber and filter
             levels_to_download = self.fetch_and_filter()
 
@@ -136,7 +156,7 @@ class advanced_downloader():
                 self.download_levels(levels_to_download)
         else:
             # ...or install directly
-            self.install_from_URI(self.URI)
+            self.install_from_URIs(self.URIs)
         
         # Save calculated hashes
         self.cache.save_levelhash_cache()

@@ -124,17 +124,22 @@ class ConfigHandler:
         # Here comes everything else the interactive assistant will deal with
         # We only need the rest if no URI is specified -> else we don't need filtering and therefore we don't need filtering options
 
-        if config_handler.config["URI"] is None:
+        if config_handler.config["URIs"] == []:
             if self.config.get("levels_to_download") is None:
                 print("Just press [ENTER] if you want to download many levels using the filtering functionality of ARBSMapDo.")
-                print("If you want to download a single level/playlist instead, insert the URI here.")
+                print("If you want to manually levels/playlists instead, insert the URIs here. (Multiple supported, press 2x[ENTER] when ready.)\n")
                 user_input = input()
                 if user_input == "":
                     # Ask all the stuff for batch downloading
                     self.missing_argument_assistant_for_mapfiltering()
                 else:
-                    # Download a single map/playlist
-                    config_handler.config["URI"] = user_input
+                    # Download maps/playlists manually
+                    URIs = []
+                    while user_input != "":
+                        URIs.append(user_input)
+                        user_input = input()
+
+                    config_handler.config["URIs"] = URIs
 
     def missing_argument_assistant_for_mapfiltering(self):
         if self.config.get("levels_to_download") is None:
@@ -237,7 +242,7 @@ class ConfigHandler:
         """Can be used to save a configuration file"""
 
         # Things such as the URI should not be saved. Filter them.
-        exclude = ["URI", "preset"]
+        exclude = ["URIs", "preset"]
         filtered_config = dict()
         for key in self.config.keys():
             if key not in exclude:
@@ -251,7 +256,7 @@ class ConfigHandler:
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("URI", nargs="?", default=None, help="URI (Path or URL) to map or playlist (*.bplist). ARBSMapDo will download and install the specified map/list.")
+    parser.add_argument("URIs", nargs="*", default=[], help="URI (Path or URL) to map or playlist (*.bplist). ARBSMapDo will download and install the specified map/list.")
     parser.add_argument("--preset", default=default_config_name, help="Path to the preset to use (default: {}".format(default_config_name))
     parser.add_argument("-levels", "--levels_to_download", type=int, help="Number of levels to download. One level may have multiple difficulties!")
     parser.add_argument("--stars_min", type=int, help="Minimum star difficulty for ranked maps")
