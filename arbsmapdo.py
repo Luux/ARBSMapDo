@@ -67,6 +67,25 @@ class ConfigHandler:
 
         self.config = args_dict
 
+    def handle_non_assistant_default_values(self):
+        default_values = {
+            "vote_ratio_max": 1,
+            "tmp_dir": "./tmp",
+            "max_threads": 5,
+            "scoresaber_maxlimit": 10000,
+            "nps_min": 0,
+            "nps_max": float("inf"),
+            "notes_min": 0,
+            "notes_max": sys.maxsize,
+            "gamemode": "Standard",
+            "beatsaver_cachefile": "./arbsmapdo_cache.json",
+            "levelhash_cachefile": "./levelhash_cache.json",
+            "rescan": False,
+        }
+        
+        for key in default_values.keys():
+            if self.config.get(key) is None:
+                self.config[key] = default_values[key]
 
     def missing_argument_assistant(self):
         """
@@ -95,43 +114,11 @@ class ConfigHandler:
             # write the path to the used preset if it's not set at all
             self.save_config(default_config_name)
 
-            
+        # Handle other default config va
+        self.handle_non_assistant_default_values()
 
-        if self.config.get("vote_ratio_max") is None:
-            self.config["vote_ratio_max"] = 1
-
-        if self.config.get("tmp_dir") is None:
-            self.config["tmp_dir"] = "./tmp"
-
-        if self.config.get("max_threads") is None:
-            self.config["max_threads"] = 5
-        
-        if self.config["scoresaber_maxlimit"] is None:
-            self.config["scoresaber_maxlimit"] = 10000
-
-        if self.config.get("nps_min") is None:
-            self.config["nps_min"] = 0
-
-        if self.config.get("nps_max") is None:
-            self.config["nps_max"] = float("inf")
-
-        if self.config.get("notes_min") is None:
-            self.config["notes_min"] = 0
-
-        if self.config.get("notes_max") is None:
-            self.config["notes_max"] = sys.maxsize
-
-        if self.config.get("gamemode") is None:
-            self.config["gamemode"] = "Standard"
-
-        if self.config.get("beatsaver_cachefile") is None:
-            self.config["beatsaver_cachefile"] = "./arbsmapdo_cache.json"
-        
-        if self.config.get("levelhash_cachefile") is None:
-            self.config["levelhash_cachefile"] = "./levelhash_cache.json"
-
-            # Here comes everything else the interactive assistant will deal with
-            # We only need the rest if no URI is specified -> else we don't need filtering and therefore we don't need filtering options
+        # Here comes everything else the interactive assistant will deal with
+        # We only need the rest if no URI is specified -> else we don't need filtering and therefore we don't need filtering options
         if config_handler.config["URI"] is None:
             if self.config.get("levels_to_download") is None:
                 print("How many levels do you want to download?")
@@ -265,11 +252,13 @@ if __name__ == "__main__":
     parser.add_argument("--length_min", type=int, help="Minimum map length in seconds")
     parser.add_argument("--length_max", type=int, help="Maximum map length in seconds")
     parser.add_argument("--nps_min", type=float, help="Minimum notes per second")
-    parser.add_argument("--nps_max", type=float, help="Maximum notes per second")
+    parser.add_argument("--nps_max", type=float, help="Maximum notes per second", )
     parser.add_argument("--notes_min", type=int, help="Minimum total note count")
     parser.add_argument("--notes_max", type=int, help="Maximum total note count")
     parser.add_argument("--gamemode", type=str, choices=list(modes.values()), help="Filter by game mode.")
-    parser.add_argument("--rescan", action="store_true", default=False, help="Force rescan of already downloaded songs. This resets the cache and results in manually deleted songs being in the pool again.")
+    parser.add_argument("--rescan", action="store_true", help="Force rescan of already downloaded songs. This resets the cache and results in manually deleted songs being in the pool again.")
+    parser.add_argument("--beatsaver_cachefile", type=Path, help="Cache file used for BeatSaver cache. (You usually don't have to change this.)")
+    parser.add_argument("--levelhash-cachefile", type=Path, help="Cache file used for caching already calculated level hashes. (You usually don't have to change this.)")
     parser.add_argument("-s", "--skip_assistant", action="store_true",
                         help="Skip assistant except for neccessary things. You'll need to specify every argument via command line or preset")
     args = parser.parse_args()
