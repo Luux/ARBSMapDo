@@ -58,7 +58,13 @@ class advanced_downloader():
 
             # Keys do not rely on the actual cache functionality
             # but the API calls are almost identical, that's why cache.get_beatsaver_info handles hashes AND keys
-            level_dict["beatsaver_info"] = self.cache.get_beatsaver_info(level_key)
+            beatsaver_info = self.cache.get_beatsaver_info(level_key)
+
+            if self.does_level_already_exist(beatsaver_info["_id"]):
+                print("Level already exists. Skipping.")
+                return
+            
+            level_dict["beatsaver_info"] = beatsaver_info
 
             # We got everything we need, so let's go
             self.download_levels([level_dict])
@@ -107,7 +113,7 @@ class advanced_downloader():
                 if(next_level_number < len(levels) and len(current_threads) < self.max_threads):
                     level = levels[next_level_number]
                     download_url = "https://beatsaver.com" + level["beatsaver_info"]["directDownload"]
-                    levelhash = level["beatsaver_info"]["_id"]
+                    levelhash = level["beatsaver_info"]["_id"].upper()
                     name = self._get_level_dirname(level)
                     self.cache.levelhash_cache[name] = levelhash
 
@@ -212,10 +218,14 @@ class advanced_downloader():
                             return download_list
         return download_list
 
+    def does_level_already_exist(self, levelhash):
+        if levelhash.upper() in self.cache.levelhash_cache.values():
+            return True
+        return False
 
     def _filter_level_scoresaber_only(self, scoresaber_info, ids_to_filter):
         # filter already downloaded
-        if scoresaber_info["id"].upper() in self.cache.levelhash_cache.values():
+        if self.does_map_already_exist(scoresaber_info["id"]):
             return False
 
         # Filter by difficulty
@@ -308,7 +318,7 @@ class advanced_downloader():
         levelname = "".join(c for c in level_scoresaber_dict["beatsaver_info"]["name"] if c in valid_chars).replace(" ", "-")
 
         return "{id}_{author}_{levelname}".format(
-            id=level_scoresaber_dict["beatsaver_info"]["_id"],
+            id=level_scoresaber_dict["beatsaver_info"]["_id"].upper(),
             author=author,
             levelname=levelname
         )
