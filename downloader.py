@@ -57,8 +57,10 @@ class advanced_downloader():
 
     def install_from_URI(self, URI):
         # Handle single level url...
-        if self.URI_type in [utils.URI_type.map_beatsaver, utils.URI_type.map_bsaber]:
-            level_key = utils.get_level_key_from_url(self.URI, self.URI_type)
+        if self.URI_type is utils.URI_type.unknown:
+            raise NotImplementedError("URI not recognized. This type of content may not be implemented for direct DL yet. Please try downloading the song/playlist manually.")
+        if self.URI_type in [utils.URI_type.map_beatsaver, utils.URI_type.map_bsaber, utils.URI_type.map_scoresaber]:
+            level_key = utils.get_level_id_from_url(self.URI, self.URI_type)
             level_dict = dict()
 
             # Keys do not rely on the actual cache functionality
@@ -110,8 +112,6 @@ class advanced_downloader():
             # As soon as every level is downloaded, move bplist to playlist folder
             shutil.copy(str(bplist_path), str(self.playlist_dir.joinpath(bplist_path.name)))
             print("Installed Playlist: {}".format(bplist_path.name))
-        
-    
 
     def clean_temp_dir(self):
         """Clean temp dir only if safe (directory is empty)"""

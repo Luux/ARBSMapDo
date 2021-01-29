@@ -82,8 +82,14 @@ def get_map_or_playlist_resource_type(input_string):
             # WARNING really unverified here
             return URI_type.playlist_bsaber
     
+    if parsed.hostname == "scoresaber.com":
+        if parsed.path.split("/")[1] == "leaderboard":
+            return URI_type.map_scoresaber
+    
+    return URI_type.unknown
+    
 
-def get_level_key_from_url(map_url, resource_type):
+def get_level_id_from_url(map_url, resource_type):
     parsed = urlparse(map_url)
 
     if resource_type is URI_type.map_beatsaver or resource_type is URI_type.map_bsaber:
@@ -93,8 +99,11 @@ def get_level_key_from_url(map_url, resource_type):
         return key
     
     if resource_type is URI_type.map_scoresaber:
-        # TODO
-        return NotImplementedError
+        request = requests.get(map_url)
+        soup = BeautifulSoup(request.text, "html.parser")
+
+        ID_selector = soup.find(text="ID: ").next_element.next
+        return str(ID_selector)
 
 def get_level_hashes_from_playlist(bplist_path):
     with open(bplist_path, encoding="utf-8") as fp:
