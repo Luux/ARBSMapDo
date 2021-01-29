@@ -2,3 +2,4 @@ toml >= 0.10.0
 requests >= 2.22.0
 progressbar2 >= 3.47.0
 wget >= 3.2
+bs4 >= 4.9.3
