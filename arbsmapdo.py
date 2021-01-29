@@ -44,14 +44,14 @@ class ConfigHandler:
         # Non-"None" Arguments passed overwrite the preset
         args_dict = vars(args)
         preset_config = None
-        path = dir_script.joinpath(args.preset)
+        preset_path = dir_script.joinpath(args.preset)
 
-        if os.path.isfile(path):
+        if os.path.isfile(preset_path):
             try:
-                preset_config = toml.load(path)
+                preset_config = toml.load(preset_path)
                 print("Using preset: " + args.preset + "\n")
             except:
-                print("ERROR while parsing config " + str(path))
+                print("ERROR while parsing config " + str(preset_path))
                 raise
         else:
             # When running the first time
@@ -228,6 +228,7 @@ class ConfigHandler:
 
 if __name__ == "__main__":
     parser = ArgumentParser()
+    parser.add_argument("URI", default=None, help="URI (Path or URL) to map or playlist (*.bplist). ARBSMapDo will download and install the specified map/list.")
     parser.add_argument("--preset", default=default_config_name, help="Path to the preset to use (default: {}".format(default_config_name))
     parser.add_argument("-levels", "--levels_to_download", type=int, help="Number of levels to download. One level may have multiple difficulties!")
     parser.add_argument("--stars_min", type=int, help="Minimum star difficulty for ranked maps")
