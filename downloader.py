@@ -79,17 +79,17 @@ class advanced_downloader():
                 # Keys do not rely on the actual cache functionality
                 # but the API calls are almost identical, that's why cache.get_beatsaver_info handles hashes AND keys
                 beatsaver_info = self.cache.get_beatsaver_info(level_key)
-
-                level_id = beatsaver_info["_id"]
-                # Check if level is already installed
-                if self.does_level_already_exist(level_id):
-                    print("Level {} already exists. Skipping.".format(level_id))
-                    next
-                else:
-                    
-                    if not check_for_duplicates(level_id):    
-                        level_dict["beatsaver_info"] = beatsaver_info
-                        levels_to_download.append(level_dict)
+                if beatsaver_info is not None:
+                    level_id = beatsaver_info["_id"]
+                    # Check if level is already installed
+                    if self.does_level_already_exist(level_id):
+                        print("Level {} already exists. Skipping.".format(level_id))
+                        next
+                    else:
+                        
+                        if not check_for_duplicates(level_id):    
+                            level_dict["beatsaver_info"] = beatsaver_info
+                            levels_to_download.append(level_dict)
 
             # ...OR handle entire playlist
             elif URI_type in [utils.URI_type.playlist_file, utils.URI_type.playlist_bsaber]:
@@ -115,9 +115,10 @@ class advanced_downloader():
                 for level_hash in level_hashes:
                     if not self.does_level_already_exist(level_hash) and not check_for_duplicates(level_hash):
                         beatsaver_info = self.cache.get_beatsaver_info(level_hash)
-                        level = dict()
-                        level["beatsaver_info"] = beatsaver_info
-                        levels_to_download.append(level)
+                        if beatsaver_info is not None:
+                            level = dict()
+                            level["beatsaver_info"] = beatsaver_info
+                            levels_to_download.append(level)
                 if len(levels_to_download) < len(level_hashes):
                     print("{} levels of the specified playlist have already been downloaded. These will be skipped.".format(len(level_hashes) - len(levels_to_download)))
                 
