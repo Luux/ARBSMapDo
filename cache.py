@@ -36,6 +36,7 @@ class Cache:
         self.download_dir = Path(arbsmapdo_config["download_dir"])
         self.beatsaver_cachefile = Path(arbsmapdo_config["beatsaver_cachefile"])
         self.levelhash_cachefile = Path(arbsmapdo_config["levelhash_cachefile"])
+        self.force_rescan = arbsmapdo_config["rescan"]
 
         self._beatsaver_cache, self.local_cache_last_downloaded = self.load_beatsaver_cache_from_andruzzzhka_scrapes()
         self.levelhash_cache = self.load_levelhash_cache()
@@ -113,7 +114,7 @@ class Cache:
         return info
 
     def load_levelhash_cache(self):
-        if self.levelhash_cachefile.is_file():
+        if self.levelhash_cachefile.is_file() and self.force_rescan is False:
             with open(self.levelhash_cachefile, "r", encoding="UTF-8") as fp:
                 hashcache = json.load(fp)
                 return hashcache

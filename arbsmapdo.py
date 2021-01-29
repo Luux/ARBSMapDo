@@ -248,6 +248,7 @@ if __name__ == "__main__":
     parser.add_argument("--notes_min", type=int, help="Minimum total note count")
     parser.add_argument("--notes_max", type=int, help="Maximum total note count")
     parser.add_argument("--gamemode", type=str, choices=list(modes.values()), help="Filter by game mode.")
+    parser.add_argument("--rescan", action="store_true", default=False, help="Force rescan of already downloaded songs. This resets the cache and results in manually deleted songs being in the pool again.")
     parser.add_argument("-s", "--skip_assistant", action="store_true",
                         help="Skip assistant except for neccessary things. You'll need to specify every argument via command line or preset")
     args = parser.parse_args()
