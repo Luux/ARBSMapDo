@@ -142,7 +142,7 @@ class Cache:
                 if entry.is_dir():
                     levelhash = utils.calculate_Level_hash_from_dir(self.download_dir.joinpath(entry.name))
                     self.levelhash_cache[entry.name] = levelhash
-                if entry.is_file() and entry.suffix == "zip":
+                if entry.is_file() and entry.suffix == ".zip":
                     levelhash = utils.calculate_Level_hash_from_zip(self.download_dir.joinpath(entry.name))
                     self.levelhash_cache[entry.name] = levelhash
 

@@ -243,7 +243,9 @@ class advanced_downloader():
         with open(str(tmp_path), "wb+") as tmp:
             tmp.write(data.content)
 
-        if not self.noextract:
+        if self.noextract:
+            shutil.move(str(tmp_path), str(self.download_dir))
+        else:
             try:
                 with zipfile.ZipFile(str(tmp_path), "r") as zip_file:
                     final_path = self.download_dir.joinpath(name)
@@ -255,7 +257,7 @@ class advanced_downloader():
                 shutil.rmtree(final_path)
                 self._download_level(url, name)
 
-        tmp_path.unlink()
+            tmp_path.unlink()
 
 
 

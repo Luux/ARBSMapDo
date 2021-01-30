@@ -64,7 +64,7 @@ def calculate_Level_hash_from_zip(levelPath):
     # Similar to calculate_Level_hash_from_dir(), but inside the zip
 
     with zipfile.ZipFile(str(levelPath), "r") as zip_file:
-        with zip_file.open("info.dat") as tmpfile:
+        with zip_file.open("Info.dat") as tmpfile:
             info_binary = tmpfile.read()
             info_data = json.loads(info_binary, encoding="utf-8")
 
@@ -77,7 +77,7 @@ def calculate_Level_hash_from_zip(levelPath):
                 beatmap_filename = beatmap.get("_beatmapFilename")
 
                 # Read difficulty file and concatenate to the binary info data
-                with zip_file.open(beatmap_filename, "rb") as tmpfile:
+                with zip_file.open(beatmap_filename, "r") as tmpfile:
                     diff_binary = tmpfile.read()
                     hasher.update(diff_binary)
     
