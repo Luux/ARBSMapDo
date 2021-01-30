@@ -9,6 +9,7 @@ import json
 import hashlib
 import requests
 import re
+import zipfile
 
 class URI_type(Enum):
     unknown = 0
@@ -22,7 +23,7 @@ class URI_type(Enum):
     playlist_bsaber = 8
 
 
-def calculate_Level_hash(levelPath):
+def calculate_Level_hash_from_dir(levelPath):
     levelPath = Path(levelPath)
     infoPath = levelPath.joinpath("./info.dat")
 
@@ -56,6 +57,35 @@ def calculate_Level_hash(levelPath):
     sha1 = hasher.hexdigest().upper()
 
     return sha1
+
+def calculate_Level_hash_from_zip(levelPath):
+    levelPath = Path(levelPath)
+
+    # Similar to calculate_Level_hash_from_dir(), but inside the zip
+
+    with zipfile.ZipFile(str(levelPath), "r") as zip_file:
+        with zip_file.open("info.dat") as tmpfile:
+            info_binary = tmpfile.read()
+            info_data = json.loads(info_binary, encoding="utf-8")
+
+        hasher = hashlib.sha1()
+        hasher.update(info_binary)
+        difficulty_sets = info_data.get("_difficultyBeatmapSets")
+
+        for diffset in difficulty_sets:
+            for beatmap in diffset.get("_difficultyBeatmaps"):
+                beatmap_filename = beatmap.get("_beatmapFilename")
+
+                # Read difficulty file and concatenate to the binary info data
+                with zip_file.open(beatmap_filename, "rb") as tmpfile:
+                    diff_binary = tmpfile.read()
+                    hasher.update(diff_binary)
+    
+    # Calculate the final hash
+    sha1 = hasher.hexdigest().upper()
+
+    return sha1
+
 
 
 def get_map_or_playlist_resource_type(input_string):

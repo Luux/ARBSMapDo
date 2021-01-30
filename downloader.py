@@ -32,6 +32,7 @@ class advanced_downloader():
         self.tmp_dir = dir_script.joinpath(config["tmp_dir"])
         self.max_threads = config["max_threads"]
         self.URIs = config["URIs"]
+        self.noextract = config["noextract"]
         
         playlist_name = config.get("playlist")
         self.playlist = playlist.Playlist(config) if playlist_name is not None else None
@@ -242,16 +243,17 @@ class advanced_downloader():
         with open(str(tmp_path), "wb+") as tmp:
             tmp.write(data.content)
 
-        try:
-            with zipfile.ZipFile(str(tmp_path), "r") as zip_file:
-                final_path = self.download_dir.joinpath(name)
-                final_path.mkdir()
-                zip_file.extractall(str(final_path))
+        if not self.noextract:
+            try:
+                with zipfile.ZipFile(str(tmp_path), "r") as zip_file:
+                    final_path = self.download_dir.joinpath(name)
+                    final_path.mkdir()
+                    zip_file.extractall(str(final_path))
 
-        except zipfile.BadZipFile:
-            print("Downloaded zip-File {} seems to be broken. Trying re-download...")
-            shutil.rmtree(final_path)
-            self._download_level(url, name)
+            except zipfile.BadZipFile:
+                print("Downloaded zip-File {} seems to be broken. Trying re-download...")
+                shutil.rmtree(final_path)
+                self._download_level(url, name)
 
         tmp_path.unlink()
 

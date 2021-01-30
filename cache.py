@@ -136,13 +136,15 @@ class Cache:
         print("Scanning already existing maps...")
         # Iterate over all directories in the download directory, scanning for already existing levels
         for entry in self.download_dir.iterdir():
-            if entry.is_dir():
-               # For each directory (which is an entire mapdir), see if hash was already calculated
-               # If this is not the case -> calculate the hash and store to hashcache
-               if entry.name not in self.levelhash_cache.keys():
-                    levelhash = utils.calculate_Level_hash(self.download_dir.joinpath(entry.name))
+            # For each directory (which is an entire mapdir), see if hash was already calculated
+            # If this is not the case -> calculate the hash and store to hashcache
+            if entry.name not in self.levelhash_cache.keys():
+                if entry.is_dir():
+                    levelhash = utils.calculate_Level_hash_from_dir(self.download_dir.joinpath(entry.name))
                     self.levelhash_cache[entry.name] = levelhash
-
+                if entry.is_file() and entry.suffix == "zip":
+                    levelhash = utils.calculate_Level_hash_from_zip(self.download_dir.joinpath(entry.name))
+                    self.levelhash_cache[entry.name] = levelhash
 
 
 

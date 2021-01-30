@@ -85,6 +85,7 @@ class ConfigHandler:
             "beatsaver_cachefile": "./arbsmapdo_cache.json",
             "levelhash_cachefile": "./levelhash_cache.json",
             "rescan": False,
+            "noextract": False,
         }
         
         for key in default_values.keys():
@@ -259,6 +260,7 @@ if __name__ == "__main__":
     parser.add_argument("URIs", nargs="*", default=[], help="URI (Path or URL) to map or playlist (*.bplist). ARBSMapDo will download and install the specified map/list.")
     parser.add_argument("--preset", default=default_config_name, help="Path to the preset to use (default: {}".format(default_config_name))
     parser.add_argument("-levels", "--levels_to_download", type=int, help="Number of levels to download. One level may have multiple difficulties!")
+    parser.add_argument("--noextract", action="store_true", help="Do not extract *.zip files. Helpful for Quest users as you can upload them directly to BMBF!")
     parser.add_argument("--stars_min", type=int, help="Minimum star difficulty for ranked maps")
     parser.add_argument("--stars_max", type=int, help="Maximum star difficulty for ranked maps")
     parser.add_argument("--ranked_only", type=bool, help="Only download ranked maps (True or False / 1 or 0)")
