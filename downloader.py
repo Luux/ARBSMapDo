@@ -237,15 +237,24 @@ class advanced_downloader():
 
         data = requests.get(url, headers=headers)
         tmp_path = self.tmp_dir.joinpath(name + ".zip")
+        if tmp_path.is_file():
+            tmp_path.unlink()
         with open(str(tmp_path), "wb+") as tmp:
             tmp.write(data.content)
 
-        with zipfile.ZipFile(str(tmp_path), "r") as zip_file:
-            final_path = self.download_dir.joinpath(name)
-            final_path.mkdir()
-            zip_file.extractall(str(final_path))
-        
+        try:
+            with zipfile.ZipFile(str(tmp_path), "r") as zip_file:
+                final_path = self.download_dir.joinpath(name)
+                final_path.mkdir()
+                zip_file.extractall(str(final_path))
+
+        except zipfile.BadZipFile:
+            print("Downloaded zip-File {} seems to be broken. Trying re-download...")
+            shutil.rmtree(final_path)
+            self._download_level(url, name)
+
         tmp_path.unlink()
+
 
 
     def fetch_and_filter(self):
