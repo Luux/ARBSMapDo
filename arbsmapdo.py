@@ -104,20 +104,23 @@ class ConfigHandler:
         # No default values for argparse, cause we need to handle presets as well!
 
         if self.config.get("download_dir") is None:
-            print("Download directory not yet specified. Please input the download directory (usually '[BeatSaberPath]\\Beat Saber_Data\\CustomLevels').")
+            print("Download directory not yet specified. Please input the download directory")
+            print("(usually '[BeatSaberPath]\\Beat Saber_Data\\CustomLevels').\n")
             download_dir = self.get_validated_input(Path, skippable=False).absolute()
             self.config["download_dir"] = str(download_dir)
-        
+
             # write the path to the used preset if it's not set at all
             self.save_config(default_config_name)
+            print("\n----------------------------------------------------------------------------\n")
 
         if self.config.get("playlist_dir") is None:
             playlist_path = Path(self.config["download_dir"]).joinpath("../../Playlists/").resolve()
-            print("\nPlaylists will be saved at {}. If this is correct, confirm with [ENTER], else specify a custom path below.".format(playlist_path.absolute()))
+            print("\nPlaylists will be saved at {}\nIf this is correct, confirm with [ENTER], else specify a custom path below.\n".format(playlist_path.absolute()))
             playlist_path = self.get_validated_input(Path, skippable=True, default=playlist_path).resolve().absolute()
             self.config["playlist_dir"] = str(playlist_path)
             # write the path to the used preset if it's not set at all
             self.save_config(default_config_name)
+            print("----------------------------------------------------------------------------\n")
 
         # Handle other default config va
         self.handle_non_assistant_default_values()
@@ -127,8 +130,9 @@ class ConfigHandler:
 
         if config_handler.config["URIs"] == []:
             if self.config.get("levels_to_download") is None:
-                print("Just press [ENTER] if you want to download many levels using the filtering functionality of ARBSMapDo.")
-                print("If you want to manually levels/playlists instead, insert the URIs here. (Multiple supported, press 2x[ENTER] when ready.)\n")
+                print("\n- Just press [ENTER] if you want to download many levels using the filtering functionality of ARBSMapDo.")
+                print("\n- If you want to manually download levels/playlists instead, insert the URIs here.")
+                print("(Multiple are supported, press 2x[ENTER] when ready.)\n")
                 user_input = input()
                 if user_input == "":
                     # Ask all the stuff for batch downloading
@@ -144,22 +148,22 @@ class ConfigHandler:
 
     def missing_argument_assistant_for_mapfiltering(self):
         if self.config.get("levels_to_download") is None:
-            print("How many levels do you want to download?")
+            print("How many levels do you want to download?\n")
             self.config["levels_to_download"] = self.get_validated_input(int, min_value=1, skippable=False)
 
         if self.config.get("ranked_only") is None:
-            print("Would you like to download only levels that have a ranked map? (Default: 1)")
+            print("\nWould you like to download only levels that have a ranked map? (Default: 1)")
             print("(A Level will be downloaded if there's at least one ranked difficulty)")
             print("0 - All Maps")
-            print("1 - Ranked Only")
+            print("1 - Ranked Only\n")
             self.config["ranked_only"] = self.get_validated_input(int, default=1, choices=[0, 1])
         
         if self.config.get("scoresaber_sorting") is None:
-                print("Which sorting (from scoresaber side) should be used? (Default: 1)")
+                print("\nWhich sorting (from scoresaber side) should be used? (Default: 1)")
                 print("0 - Trends")
                 print("1 - Date Ranked")
                 print("2 - Scores Set")
-                print("3 - Star Difficulty (only if ranked)")
+                print("3 - Star Difficulty (only if ranked)\n")
                 self.config["scoresaber_sorting"] = self.get_validated_input(dst_type=int, default=1, choices=[0, 1, 2, 3])
 
         # Note that this probably isn't very useful when looking for ranked maps,
@@ -175,30 +179,30 @@ class ConfigHandler:
         #     self.config["gamemode"] = mode
 
         if self.config.get("stars_min") is None:
-            print("Minimum Stars? (Default: 0)")
+            print("Minimum Stars? (Default: 0)\n")
             self.config["stars_min"] = self.get_validated_input(float, default=0, min_value=0, max_value=50)
 
         if self.config.get("stars_max") is None:
-            print("Maximum Stars? (Default: 50)")
+            print("Maximum Stars? (Default: 50)\n")
             self.config["stars_max"] = self.get_validated_input(float, default=50, min_value=0, max_value=50)
 
         if self.config.get("vote_ratio_min") is None:
-            print("What's the minimum percentage of upvotes (of total votes) the map should have? (Value between 0 and 1, Default: 0)")
+            print("What's the minimum percentage of upvotes (of total votes) the map should have? (Value between 0 and 1, Default: 0)\n")
             self.config["vote_ratio_min"] = self.get_validated_input(float, default=0, min_value=0, max_value=1)
 
         if self.config.get("length_min") is None:
-            print("Do you want to set a minimum map length (in seconds)? (Default: 0)")
+            print("Do you want to set a minimum map length (in seconds)? (Default: 0)\n")
             self.config["length_min"] = self.get_validated_input(float, default=0, min_value=0)
         
         if self.config.get("length_max") is None:
-            print("Do you want to set a maximum map length (in seconds)? (Default: infinite)")
+            print("Do you want to set a maximum map length (in seconds)? (Default: infinite)\n")
             self.config["length_max"] = self.get_validated_input(float, default=float("inf"), min_value=0)
 
 
         save_preset = self.config.get("save_preset")
         if save_preset is not None:
             self.save_config(save_preset)
-            print("Preset saved: {}\n Saved to: {}".format(str(self.config), str(save_preset)))
+            print("\nPreset saved: {}\n Saved to: {}\n".format(str(self.config), str(save_preset)))
 
 
     def get_validated_input(self, dst_type, default=None, choices=None, min_value=None, max_value=None, skippable=True):
@@ -209,6 +213,7 @@ class ConfigHandler:
             return default
         while True:
             response = input()
+            print("")
             if response == "" and default is not None:
                 return default
             else:
@@ -295,6 +300,8 @@ if __name__ == "__main__":
     print("Do you want to save your config for further use? Use --save_preset 'name'")
     print("If you want to load a specific config, you can use --preset 'name'")
     print("All options are available directly from the command line as well as via presets.\n")
+    print("----------------------------------------------------------------------------")
+    print("----------------------------------------------------------------------------\n")
 
     config_handler = ConfigHandler(args)
     config_handler.missing_argument_assistant()
