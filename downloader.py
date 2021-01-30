@@ -66,7 +66,7 @@ class advanced_downloader():
             # Check for duplicates during the current session
              # May occur when downloading multiple playlists
             for other_level in levels_to_download:
-                if other_level["beatsaver_info"]["_hash"].upper() == level_hash.upper():
+                if other_level["beatsaver_info"]["hash"].upper() == level_hash.upper():
                     return True
             return False
 
