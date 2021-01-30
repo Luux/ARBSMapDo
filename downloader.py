@@ -61,11 +61,11 @@ class advanced_downloader():
         levels_to_download = []
         local_bplists = []
 
-        def check_for_duplicates(level_id):
+        def check_for_duplicates(level_hash):
             # Check for duplicates during the current session
              # May occur when downloading multiple playlists
             for other_level in levels_to_download:
-                if other_level["beatsaver_info"]["_id"].upper() == level_id.upper():
+                if other_level["beatsaver_info"]["_hash"].upper() == level_hash.upper():
                     return True
             return False
 
@@ -79,7 +79,7 @@ class advanced_downloader():
                 next
 
             if URI_type in [utils.URI_type.map_beatsaver, utils.URI_type.map_bsaber, utils.URI_type.map_scoresaber]:
-                level_key = utils.get_level_id_from_url(URI, URI_type)
+                level_key = utils.get_level_hash_from_url(URI, URI_type)
                 level_dict = dict()
 
                 # Keys do not rely on the actual cache functionality
@@ -87,18 +87,18 @@ class advanced_downloader():
                 beatsaver_info = self.cache.get_beatsaver_info(level_key)
 
                 if beatsaver_info is not None:
-                    level_id = beatsaver_info["_id"]
+                    level_hash = beatsaver_info["hash"]
                     level_dict["beatsaver_info"] = beatsaver_info
                     
-                    if not check_for_duplicates(level_id):
+                    if not check_for_duplicates(level_hash):
 
                         # Add level to playlist if specified
                         if self.playlist is not None:
                             self.playlist.add_to_playlist(level_dict)
 
                         # Check if level is already installed
-                        if self.does_level_already_exist(level_id):
-                            print("Level {} already exists. Skipping or only adding to playlist.".format(level_id))
+                        if self.does_level_already_exist(level_hash):
+                            print("Level {} already exists. Skipping or only adding to playlist.".format(level_hash))
                             next
                         else:
                             levels_to_download.append(level_dict)
@@ -211,7 +211,7 @@ class advanced_downloader():
                 if(next_level_number < len(levels) and len(current_threads) < self.max_threads):
                     level = levels[next_level_number]
                     download_url = "https://beatsaver.com" + level["beatsaver_info"]["directDownload"]
-                    levelhash = level["beatsaver_info"]["_id"].upper()
+                    levelhash = level["beatsaver_info"]["hash"].upper()
                     name = self._get_level_dirname(level)
                     self.cache.levelhash_cache[name] = levelhash
 
@@ -417,7 +417,7 @@ class advanced_downloader():
         levelname = "".join(c for c in level_scoresaber_dict["beatsaver_info"]["name"] if c in valid_chars).replace(" ", "-")
 
         return "{id}_{author}_{levelname}".format(
-            id=level_scoresaber_dict["beatsaver_info"]["_id"].upper(),
+            id=level_scoresaber_dict["beatsaver_info"]["hash"].upper(),
             author=author,
             levelname=levelname
         )

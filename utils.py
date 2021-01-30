@@ -89,7 +89,7 @@ def get_map_or_playlist_resource_type(input_string):
     return URI_type.unknown
     
 
-def get_level_id_from_url(map_url, resource_type):
+def get_level_hash_from_url(map_url, resource_type):
     parsed = urlparse(map_url)
 
     if resource_type is URI_type.map_beatsaver or resource_type is URI_type.map_bsaber:
