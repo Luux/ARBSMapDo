@@ -1,3 +1,6 @@
+import utils
+import playlist
+
 import requests
 import sys
 import os
@@ -6,9 +9,8 @@ import progressbar
 import threading
 import zipfile
 import cache
-import utils
-import shutil
 
+import shutil
 
 from bs4 import BeautifulSoup
 from inspect import getfile
@@ -30,6 +32,9 @@ class advanced_downloader():
         self.tmp_dir = dir_script.joinpath(config["tmp_dir"])
         self.max_threads = config["max_threads"]
         self.URIs = config["URIs"]
+        
+        playlist_name = config.get("playlist")
+        self.playlist = playlist.Playlist(config) if playlist_name is not None else None
 
         # Only when filtering
         if self.URIs == []:
@@ -72,6 +77,7 @@ class advanced_downloader():
                 print("URI {} not recognized. This type of content may not be implemented for direct DL yet. Please try downloading the song/playlist manually."
                                           .format(URI))
                 next
+
             if URI_type in [utils.URI_type.map_beatsaver, utils.URI_type.map_bsaber, utils.URI_type.map_scoresaber]:
                 level_key = utils.get_level_id_from_url(URI, URI_type)
                 level_dict = dict()
@@ -79,16 +85,22 @@ class advanced_downloader():
                 # Keys do not rely on the actual cache functionality
                 # but the API calls are almost identical, that's why cache.get_beatsaver_info handles hashes AND keys
                 beatsaver_info = self.cache.get_beatsaver_info(level_key)
+
                 if beatsaver_info is not None:
                     level_id = beatsaver_info["_id"]
-                    # Check if level is already installed
-                    if self.does_level_already_exist(level_id):
-                        print("Level {} already exists. Skipping.".format(level_id))
-                        next
-                    else:
-                        
-                        if not check_for_duplicates(level_id):    
-                            level_dict["beatsaver_info"] = beatsaver_info
+                    level_dict["beatsaver_info"] = beatsaver_info
+                    
+                    if not check_for_duplicates(level_id):
+
+                        # Add level to playlist if specified
+                        if self.playlist is not None:
+                            self.playlist.add_to_playlist(level_dict)
+
+                        # Check if level is already installed
+                        if self.does_level_already_exist(level_id):
+                            print("Level {} already exists. Skipping or only adding to playlist.".format(level_id))
+                            next
+                        else:
                             levels_to_download.append(level_dict)
 
             # ...OR handle entire playlist
@@ -113,12 +125,18 @@ class advanced_downloader():
                 level_hashes = utils.get_level_hashes_from_playlist(bplist_path)
 
                 for level_hash in level_hashes:
-                    if not self.does_level_already_exist(level_hash) and not check_for_duplicates(level_hash):
-                        beatsaver_info = self.cache.get_beatsaver_info(level_hash)
-                        if beatsaver_info is not None:
-                            level = dict()
-                            level["beatsaver_info"] = beatsaver_info
+                    beatsaver_info = self.cache.get_beatsaver_info(level_hash)
+                    if beatsaver_info is not None:
+                        level = dict()
+                        level["beatsaver_info"] = beatsaver_info
+
+                        # Add level to playlist if specified
+                        if self.playlist is not None:
+                            self.playlist.add_to_playlist(level)
+
+                        if not self.does_level_already_exist(level_hash) and not check_for_duplicates(level_hash):
                             levels_to_download.append(level)
+
                 if len(levels_to_download) < len(level_hashes):
                     print("{} levels of the specified playlist have already been downloaded. These will be skipped.".format(len(level_hashes) - len(levels_to_download)))
                 
@@ -132,7 +150,6 @@ class advanced_downloader():
         for bplist in local_bplists:
             shutil.copy(str(bplist), str(self.playlist_dir.joinpath(bplist.name)))
             print("Installed Playlist: {}".format(bplist_path.name))
-        print("Done!")
 
     def clean_temp_dir(self):
         """Clean temp dir only if safe (directory is empty)"""
@@ -155,6 +172,11 @@ class advanced_downloader():
             # Finally, download filtered Maps
             if len(levels_to_download) > 0:
                 self.download_levels(levels_to_download)
+
+            # Add levels to playlist if specified
+            for level in levels_to_download:
+                if self.playlist is not None:
+                    self.playlist.add_to_playlist(level)
         else:
             # ...or install directly
             self.install_from_URIs(self.URIs)
@@ -162,8 +184,14 @@ class advanced_downloader():
         # Save calculated hashes
         self.cache.save_levelhash_cache()
 
+        # Save playlist
+        if self.playlist is not None:
+            self.playlist.save_playlist()
+
         # Cleanup
         self.clean_temp_dir()
+
+        print("Done!")
 
     def download_levels(self, levels: list):
         """Download a specific list of levels using multiple threads"""
@@ -187,6 +215,7 @@ class advanced_downloader():
                     name = self._get_level_dirname(level)
                     self.cache.levelhash_cache[name] = levelhash
 
+                    # Start Thread for DL
                     print("Downloading " + name)
                     thread = threading.Thread(target=self._download_level, args=[download_url, name])
                     current_threads.append(thread)
@@ -201,6 +230,7 @@ class advanced_downloader():
                         else:
                             i += 1
                 bar.update(finished)
+
 
     def _download_level(self, url, name):
         """Threading helper function to download a single level"""

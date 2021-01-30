@@ -49,7 +49,7 @@ class ConfigHandler:
         if os.path.isfile(preset_path):
             try:
                 preset_config = toml.load(preset_path)
-                print("Using preset: " + args.preset + "\n")
+                print("Using preset: " + args.preset)
             except:
                 print("ERROR while parsing config " + str(preset_path))
                 raise
@@ -281,6 +281,7 @@ if __name__ == "__main__":
     parser.add_argument("--rescan", action="store_true", help="Force rescan of already downloaded songs. This resets the cache and results in manually deleted songs being in the pool again.")
     parser.add_argument("--beatsaver_cachefile", type=Path, help="Cache file used for BeatSaver cache. (You usually don't have to change this.)")
     parser.add_argument("--levelhash-cachefile", type=Path, help="Cache file used for caching already calculated level hashes. (You usually don't have to change this.)")
+    parser.add_argument("--playlist", help="Playlist (file name) where levels from this session should be added. If the specified playlist does not exist yet, it will be created.")
     parser.add_argument("-s", "--skip_assistant", action="store_true",
                         help="Skip assistant except for neccessary things. You'll need to specify every argument via command line or preset")
     args = parser.parse_args()
