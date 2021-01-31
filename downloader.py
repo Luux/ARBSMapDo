@@ -12,7 +12,6 @@ import cache
 
 import shutil
 
-from bs4 import BeautifulSoup
 from inspect import getfile
 from pathlib import Path
 from json import JSONDecodeError
@@ -21,7 +20,6 @@ from json import JSONDecodeError
 dir_script = Path(getfile(lambda: 0)).parent
 
 headers = {"User-Agent": "ARBSMapDo V1"}
-
 
 
 class advanced_downloader():
@@ -49,8 +47,8 @@ class advanced_downloader():
             self.scoresaber_maxlimit = config["scoresaber_maxlimit"]
             self.stars_min = config["stars_min"]
             self.stars_max = config["stars_max"]
-            self.vote_ratio_min = config["vote_ratio_min"]
-            self.vote_ratio_max = config["vote_ratio_max"]
+            self.beatmap_rating_min = config["beatmap_rating_min"]
+            self.beatmap_rating_max = config["beatmap_rating_max"]
             self.length_min = config["length_min"]
             self.length_max = config["length_max"]
             self.notes_min = config["notes_min"]
@@ -405,6 +403,7 @@ class advanced_downloader():
         bs_stats = bs_info["stats"]
         bs_upvotes = int(bs_stats["upVotes"])
         bs_downvotes = int(bs_stats["downVotes"])
+        bs_rating = float(bs_stats["rating"])
 
         # Filter each difficulty
         bs_characteristics = bs_metadata.get("characteristics")
@@ -414,10 +413,7 @@ class advanced_downloader():
             if _filter_characteristic(characteristic):
                 characteristics_ok = True
         
-        vote_ratio = 0.5 # division / 0 if map has no votes yet
-        if bs_upvotes + bs_downvotes > 0:
-            vote_ratio = bs_upvotes / (bs_upvotes + bs_downvotes)
-        if vote_ratio < self.vote_ratio_min or vote_ratio > self.vote_ratio_max:
+        if bs_rating < self.beatmap_rating_min or bs_rating > self.beatmap_rating_max:
             return False
 
         if not characteristics_ok:

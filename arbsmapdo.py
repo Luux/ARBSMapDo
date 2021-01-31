@@ -73,7 +73,7 @@ class ConfigHandler:
 
     def handle_non_assistant_default_values(self):
         default_values = {
-            "vote_ratio_max": 1,
+            "beatmap_rating_max": 1,
             "tmp_dir": "./tmp",
             "max_threads": 5,
             "scoresaber_maxlimit": 10000,
@@ -83,7 +83,7 @@ class ConfigHandler:
             "notes_max": sys.maxsize,
             "gamemode": "Standard",
             "beatsaver_cachefile": "./arbsmapdo_cache.json",
-            "levelhash_cachefile": "./levelhash_cache.json",
+            "levelhash_cachefile": Path(self.config.get("download_dir")).joinpath("./levelhash_cache.json"),
             "rescan": False,
             "noextract": False,
             "playlist_image": "playlist_image.png",
@@ -199,9 +199,9 @@ class ConfigHandler:
             message = "Maximum Stars? (Default: 50)\n"
             self.config["stars_max"] = self.get_validated_input(message, float, default=50, min_value=0, max_value=50)
 
-        if self.config.get("vote_ratio_min") is None:
-            message = "What's the minimum percentage of upvotes (of total votes) the map should have? (Value between 0 and 1, Default: 0)\n"
-            self.config["vote_ratio_min"] = self.get_validated_input(message, float, default=0, min_value=0, max_value=1)
+        if self.config.get("beatmap_rating_min") is None:
+            message = "What's the minimum beatmap rating (based on votes) the map should have? (Value between 0 and 1, Default: 0)\n"
+            self.config["beatmap_rating_min"] = self.get_validated_input(message, float, default=0, min_value=0, max_value=1)
 
         if self.config.get("length_min") is None:
             message = "Do you want to set a minimum map length (in seconds)? (Default: 0)\n"
@@ -293,8 +293,8 @@ if __name__ == "__main__":
     parser.add_argument("--max_threads", type=int, help="Maximim thread count to use for downloading.")
     parser.add_argument("--scoresaber_maxlimit", type=int, help="Maximum maps per 'page' for Scoresaber API. (You usually don't have to change this.)")
     parser.add_argument("--save_preset", type=Path, help="Save specified settings into given file. You can load it next time by using --preset")
-    parser.add_argument("--vote_ratio_min", type=float, help="Minimum percentage of positive votes of total votes. (Between 0 and 1)")
-    parser.add_argument("--vote_ratio_max", type=float, help="Maximum percentage of positive votes of total votes. (Between 0 and 1)")
+    parser.add_argument("--beatmap_rating_min", type=float, help="Minimum beatmap rating. (Between 0 and 1)")
+    parser.add_argument("--beatmap_rating_max", type=float, help="Maximum beatmap rating. (Between 0 and 1)")
     parser.add_argument("--length_min", type=int, help="Minimum map length in seconds")
     parser.add_argument("--length_max", type=int, help="Maximum map length in seconds")
     parser.add_argument("--nps_min", type=float, help="Minimum notes per second")
