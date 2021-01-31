@@ -105,9 +105,9 @@ class ConfigHandler:
         # No default values for argparse, cause we need to handle presets as well!
 
         if self.config.get("download_dir") is None:
-            print("Download directory not yet specified. Please input the download directory")
-            print("(usually '[BeatSaberPath]\\Beat Saber_Data\\CustomLevels').\n")
-            download_dir = self.get_validated_input(Path, skippable=False).absolute()
+            message = ("Download directory not yet specified. Please input the download directory\n"
+                       "(usually '[BeatSaberPath]\\Beat Saber_Data\\CustomLevels').\n\n")
+            download_dir = self.get_validated_input(message, Path, skippable=False).absolute()
             self.config["download_dir"] = str(download_dir)
 
             # write the path to the used preset if it's not set at all
@@ -116,8 +116,8 @@ class ConfigHandler:
 
         if self.config.get("playlist_dir") is None:
             playlist_path = Path(self.config["download_dir"]).joinpath("../../Playlists/").resolve()
-            print("\nPlaylists will be saved at {}\nIf this is correct, confirm with [ENTER], else specify a custom path below.\n".format(playlist_path.absolute()))
-            playlist_path = self.get_validated_input(Path, skippable=True, default=playlist_path).resolve().absolute()
+            message = "\nPlaylists will be saved at {}\nIf this is correct, confirm with [ENTER], else specify a custom path below.\n\n".format(playlist_path.absolute())
+            playlist_path = self.get_validated_input(message, Path, skippable=True, default=playlist_path).resolve().absolute()
             self.config["playlist_dir"] = str(playlist_path)
             # write the path to the used preset if it's not set at all
             self.save_config(default_config_name)
