@@ -300,7 +300,7 @@ if __name__ == "__main__":
     parser.add_argument("--nps_max", type=float, help="Maximum notes per second", )
     parser.add_argument("--notes_min", type=int, help="Minimum total note count")
     parser.add_argument("--notes_max", type=int, help="Maximum total note count")
-    parser.add_argument("--gamemode", type=str, choices=list(modes.values()), help="Filter by game mode.")
+    # parser.add_argument("--gamemode", type=str, choices=list(modes.values()), help="Filter by game mode. EXPERIMENTAL! NOT FINISHED!")
     parser.add_argument("--rescan", action="store_true", help="Force rescan of already downloaded songs. This resets the cache and results in manually deleted songs being in the pool again.")
     parser.add_argument("--beatsaver_cachefile", type=Path, help="Cache file used for BeatSaver cache. (You usually don't have to change this.)")
     parser.add_argument("--levelhash_cachefile", type=Path, help="Cache file used for caching already calculated level hashes. (You usually don't have to change this.)")
