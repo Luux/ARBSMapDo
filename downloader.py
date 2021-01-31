@@ -31,6 +31,8 @@ class advanced_downloader():
         self.download_dir.mkdir(exist_ok=True)
 
         self.playlist_dir = Path(config["playlist_dir"])
+        self.download_dir.mkdir(exist_ok=True)
+        
         self.tmp_dir = dir_script.joinpath(config["tmp_dir"])
         self.max_threads = config["max_threads"]
         self.URIs = config["URIs"]
