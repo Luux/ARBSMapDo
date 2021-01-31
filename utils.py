@@ -10,6 +10,7 @@ import hashlib
 import requests
 import re
 import zipfile
+import base64
 
 class URI_type(Enum):
     unknown = 0
@@ -22,6 +23,13 @@ class URI_type(Enum):
     playlist_file = 7
     playlist_bsaber = 8
 
+def encode_image_to_base64_str(img_path):
+    img_path = Path(img_path)
+    with open(img_path, mode="rb") as fp:
+        img = fp.read()
+    
+    img_encoded = base64.b64encode(img)
+    return img_encoded.decode()
 
 def calculate_Level_hash_from_dir(levelPath):
     levelPath = Path(levelPath)

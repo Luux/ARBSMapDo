@@ -1,12 +1,14 @@
 import json
+import utils
+
 from pathlib import Path
 from pathvalidate import sanitize_filename
-
 
 class Playlist():
     def __init__(self, config):
         self.playlist_dir = Path(config["playlist_dir"])
         self.name = config.get("playlist")
+        self.playlist_image_path = config.get("playlist_image")
 
         # Auto-guess as *.bplist if extension is not given
         if not "." in self.name:
@@ -23,7 +25,7 @@ class Playlist():
             raw_playlist = {
                 "playlistTitle": self.name,
                 "playlistAuthor": "[ARBSMapDo]",
-                "image": None,
+                "image": "data:image/png;base64,{}".format(utils.encode_image_to_base64_str(self.playlist_image_path)),
                 "songs": []
             }
             return raw_playlist

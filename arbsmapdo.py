@@ -86,6 +86,7 @@ class ConfigHandler:
             "levelhash_cachefile": "./levelhash_cache.json",
             "rescan": False,
             "noextract": False,
+            "playlist_image": "playlist_image.png",
         }
         
         for key in default_values.keys():
@@ -282,8 +283,8 @@ if __name__ == "__main__":
     parser.add_argument("--preset", default=default_config_name, help="Path to the preset to use (default: {}".format(default_config_name))
     parser.add_argument("-levels", "--levels_to_download", type=int, help="Number of levels to download. One level may have multiple difficulties!")
     parser.add_argument("--noextract", action="store_true", help="Do not extract *.zip files. Helpful for Quest users as you can upload them directly to BMBF!")
-    parser.add_argument("--stars_min", type=int, help="Minimum star difficulty for ranked maps")
-    parser.add_argument("--stars_max", type=int, help="Maximum star difficulty for ranked maps")
+    parser.add_argument("--stars_min", type=float, help="Minimum star difficulty for ranked maps")
+    parser.add_argument("--stars_max", type=float, help="Maximum star difficulty for ranked maps")
     parser.add_argument("--ranked_only", type=bool, help="Only download ranked maps (True or False / 1 or 0)")
     parser.add_argument("--scoresaber_sorting", type=int, choices=[0, 1, 2], help="Scoresaber Sorting Mode. Choices: 0 - Trends, 1 - Date Ranked, 2 - Scores Set, 3 - Star Difficulty")
     parser.add_argument("--tmp_dir", type=Path, help="Temporary download dir (default: './download/')")
@@ -303,8 +304,9 @@ if __name__ == "__main__":
     parser.add_argument("--gamemode", type=str, choices=list(modes.values()), help="Filter by game mode.")
     parser.add_argument("--rescan", action="store_true", help="Force rescan of already downloaded songs. This resets the cache and results in manually deleted songs being in the pool again.")
     parser.add_argument("--beatsaver_cachefile", type=Path, help="Cache file used for BeatSaver cache. (You usually don't have to change this.)")
-    parser.add_argument("--levelhash-cachefile", type=Path, help="Cache file used for caching already calculated level hashes. (You usually don't have to change this.)")
+    parser.add_argument("--levelhash_cachefile", type=Path, help="Cache file used for caching already calculated level hashes. (You usually don't have to change this.)")
     parser.add_argument("--playlist", help="Playlist (file name) where levels from this session should be added. If the specified playlist does not exist yet, it will be created.")
+    parser.add_argument("--playlist_image", type=Path, help="When creating a new playlist, use this image. If not given, the default image will be used.")
     parser.add_argument("-s", "--skip_assistant", action="store_true",
                         help="Skip assistant except for neccessary things. You'll need to specify every argument via command line or preset")
     args = parser.parse_args()
