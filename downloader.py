@@ -153,7 +153,10 @@ class advanced_downloader():
 
         # As soon as every level is downloaded, move bplist to playlist folder
         for bplist in local_bplists:
-            shutil.copy(str(bplist), str(self.playlist_dir.joinpath(bplist.name)))
+            try:
+                shutil.copy(str(bplist), str(self.playlist_dir.joinpath(bplist.name)))
+            except shutil.SameFileError:
+                print("Playlist is already in playlist directory")
             print("Installed Playlist: {}".format(bplist_path.name))
 
     def clean_temp_dir(self):
