@@ -127,44 +127,56 @@ class ConfigHandler:
 
         # Here comes everything else the interactive assistant will deal with
         # We only need the rest if no URI is specified -> else we don't need filtering and therefore we don't need filtering options
-
-        if config_handler.config["URIs"] == []:
-            if self.config.get("levels_to_download") is None:
+        mapfiltering = False
+        
+        if config_handler.config["URIs"] == [] :
+            if self.config.get("skip_assistant") is True:
+                mapfiltering = True
+            elif self.config.get("levels_to_download") is None:
                 print("\n- Just press [ENTER] if you want to download many levels using the filtering functionality of ARBSMapDo.")
                 print("\n- If you want to manually download levels/playlists instead, insert the URIs here.")
                 print("(Multiple are supported, press 2x[ENTER] when ready.)\n")
+
                 user_input = input()
                 if user_input == "":
-                    # Ask all the stuff for batch downloading
-                    self.missing_argument_assistant_for_mapfiltering()
+                    mapfiltering = True
+                
                 else:
                     # Download maps/playlists manually
                     URIs = []
                     while user_input != "":
                         URIs.append(user_input)
                         user_input = input()
-
                     config_handler.config["URIs"] = URIs
+            else:
+                # ´--levels_to_download is given
+                mapfiltering = True
+
+        if mapfiltering:
+            # Ask all the stuff for batch downloading
+            # Or at least the mandatory stuff such as levels_to_download if --skip_assistant
+            self.missing_argument_assistant_for_mapfiltering()
+
 
     def missing_argument_assistant_for_mapfiltering(self):
         if self.config.get("levels_to_download") is None:
-            print("How many levels do you want to download?\n")
-            self.config["levels_to_download"] = self.get_validated_input(int, min_value=1, skippable=False)
+            message = "How many levels do you want to download?\n"
+            self.config["levels_to_download"] = self.get_validated_input(message, int, min_value=1, skippable=False)
 
         if self.config.get("ranked_only") is None:
-            print("\nWould you like to download only levels that have a ranked map? (Default: 1)")
-            print("(A Level will be downloaded if there's at least one ranked difficulty)")
-            print("0 - All Maps")
-            print("1 - Ranked Only\n")
-            self.config["ranked_only"] = self.get_validated_input(int, default=1, choices=[0, 1])
+            message = ("\nWould you like to download only levels that have a ranked map? (Default: 1)\n"
+            "(A Level will be downloaded if there's at least one ranked difficulty)\n\n"
+            "0 - All Maps\n"
+            "1 - Ranked Only\n")
+            self.config["ranked_only"] = self.get_validated_input(message, int, default=1, choices=[0, 1])
         
         if self.config.get("scoresaber_sorting") is None:
-                print("\nWhich sorting (from scoresaber side) should be used? (Default: 1)")
-                print("0 - Trends")
-                print("1 - Date Ranked")
-                print("2 - Scores Set")
-                print("3 - Star Difficulty (only if ranked)\n")
-                self.config["scoresaber_sorting"] = self.get_validated_input(dst_type=int, default=1, choices=[0, 1, 2, 3])
+                message = ("\nWhich sorting (from scoresaber side) should be used? (Default: 1)\n\n"
+                "0 - Trends\n"
+                "1 - Date Ranked\n"
+                "2 - Scores Set\n"
+                "3 - Star Difficulty (only if ranked)\n")
+                self.config["scoresaber_sorting"] = self.get_validated_input(message, int, default=1, choices=[0, 1, 2, 3])
 
         # Note that this probably isn't very useful when looking for ranked maps,
         # so ARBSMapDo will only ask for mode if not ranked_only.
@@ -179,24 +191,24 @@ class ConfigHandler:
         #     self.config["gamemode"] = mode
 
         if self.config.get("stars_min") is None:
-            print("Minimum Stars? (Default: 0)\n")
-            self.config["stars_min"] = self.get_validated_input(float, default=0, min_value=0, max_value=50)
+            message = "Minimum Stars? (Default: 0)\n"
+            self.config["stars_min"] = self.get_validated_input(message, float, default=0, min_value=0, max_value=50)
 
         if self.config.get("stars_max") is None:
-            print("Maximum Stars? (Default: 50)\n")
-            self.config["stars_max"] = self.get_validated_input(float, default=50, min_value=0, max_value=50)
+            message = "Maximum Stars? (Default: 50)\n"
+            self.config["stars_max"] = self.get_validated_input(message, float, default=50, min_value=0, max_value=50)
 
         if self.config.get("vote_ratio_min") is None:
-            print("What's the minimum percentage of upvotes (of total votes) the map should have? (Value between 0 and 1, Default: 0)\n")
-            self.config["vote_ratio_min"] = self.get_validated_input(float, default=0, min_value=0, max_value=1)
+            message = "What's the minimum percentage of upvotes (of total votes) the map should have? (Value between 0 and 1, Default: 0)\n"
+            self.config["vote_ratio_min"] = self.get_validated_input(message, float, default=0, min_value=0, max_value=1)
 
         if self.config.get("length_min") is None:
-            print("Do you want to set a minimum map length (in seconds)? (Default: 0)\n")
-            self.config["length_min"] = self.get_validated_input(float, default=0, min_value=0)
+            message = "Do you want to set a minimum map length (in seconds)? (Default: 0)\n"
+            self.config["length_min"] = self.get_validated_input(message, float, default=0, min_value=0)
         
         if self.config.get("length_max") is None:
-            print("Do you want to set a maximum map length (in seconds)? (Default: infinite)\n")
-            self.config["length_max"] = self.get_validated_input(float, default=float("inf"), min_value=0)
+            message = "Do you want to set a maximum map length (in seconds)? (Default: infinite)\n"
+            self.config["length_max"] = self.get_validated_input(message, float, default=float("inf"), min_value=0)
 
 
         save_preset = self.config.get("save_preset")
@@ -205,12 +217,16 @@ class ConfigHandler:
             print("\nPreset saved: {}\n Saved to: {}\n".format(str(self.config), str(save_preset)))
 
 
-    def get_validated_input(self, dst_type, default=None, choices=None, min_value=None, max_value=None, skippable=True):
+    def get_validated_input(self, message, dst_type, default=None, choices=None, min_value=None, max_value=None, skippable=True):
         """
         Used to validate User Inputs and perform some normalization.
         """
         if self.config["skip_assistant"] and skippable:
             return default
+        
+        if message is not None:
+            print(message)
+
         while True:
             response = input()
             print("")
