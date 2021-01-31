@@ -1,15 +1,14 @@
 import os
 import sys
 import toml
+import utils
 from argparse import ArgumentParser
 from pathlib import Path
 from inspect import getfile
 
 from downloader import advanced_downloader
 
-
-
-dir_script = Path(getfile(lambda: 0)).parent
+dir_script = Path(getfile(lambda: 0)).parent.absolute()
 
 default_config_name = "arbsmapdo_default.toml"
 
@@ -86,7 +85,7 @@ class ConfigHandler:
             "levelhash_cachefile": Path(self.config.get("download_dir")).joinpath("./levelhash_cache.json"),
             "rescan": False,
             "noextract": False,
-            "playlist_image": "playlist_image.png",
+            "playlist_image": utils.get_resource_path("playlist_image.png"),
         }
         
         for key in default_values.keys():

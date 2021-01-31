@@ -2,8 +2,10 @@ from pathlib import Path
 from enum import Enum
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
+from inspect import getfile
 
 import urllib3
+import sys
 import os
 import json
 import hashlib
@@ -12,6 +14,7 @@ import re
 import zipfile
 import base64
 
+dir_script = Path(getfile(lambda: 0)).parent.absolute()
 class URI_type(Enum):
     unknown = 0
     map_file = 1
@@ -22,6 +25,21 @@ class URI_type(Enum):
     map_bsaber = 6
     playlist_file = 7
     playlist_bsaber = 8
+
+def get_resource_path(relative_path):
+    """
+    Get pyinstaller-compatible path to resource. Needed for standalone version.
+    See https://stackoverflow.com/questions/51060894/adding-a-data-file-in-pyinstaller-using-the-onefile-option/51061279
+    """
+
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = Path(sys._MEIPASS).absolute()
+    except Exception:
+        base_path = dir_script
+
+    return base_path.joinpath(relative_path)
+    
 
 def encode_image_to_base64_str(img_path):
     img_path = Path(img_path)
