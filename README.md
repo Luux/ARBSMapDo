@@ -2,16 +2,21 @@
 
 **A standalone release without any prerequisites is available here: https://github.com/Luux/ARBSMapDo/releases**
 
-*Yet another map downloader tool? Who needs this?!?*
+*Yet another map downloader tool? Who needs that?!?*
 
-While there are plenty of tools and mods that help downloading playlists, trending maps from score saber and more, their filtering options are kinda limited. I wanted a tool with options like "Download 100 new ranked maps that range from 3.5 to 6 star difficulty, have a minimum of 70% positive Votes and a length between 2:00 and 3:30". ARBSMapDo allows exactly that.
+While there are plenty of tools and mods that help downloading playlists, trending maps from score saber and more, their filtering options are kinda limited. I wanted a tool with options like "Download 100 new ranked maps that range from 3.5 to 6 star difficulty, have a minimum of 70% positive Votes and a length between 2:00 and 3:30". ARBSMapDo allows to do exactly that.
 
-Currently, there are only a few common filtering options implemented. More are planned, but currently I'm focusing on a robust and user-friendly foundation (since not everyone is used to handle command line scripts with a huge number of options)
 
 ## Features
 
 * Easy mass downloading of maps crawled from Scoresaber
+* It's fast. Both in execution and in handling.
 * Filtering options not relying solely on the (undocumented) Scoresaber API - new options can (and will!) be easily added
+  - Filter by difficulty, community rating, notes per second, length, ...
+* Playlist support - Ever wanted to create a playlist with the best (or worst!) ranked maps? You can do that.
+* Give ARBSMapDo a link to BeatSaver, bsaber or Scoresaber and it will download the song. It just works, even with bsaber playlists.
+    - You can even download some songs from scoresaber and a playlist from bsaber and automatically add everything to a custom playlist.
+* CL usage - want to automate things? Here you go!
 * Presets - if you want to apply the same filters and download new maps again in a few weeks, you can simply save your settings
 * Open Source, of course.
 
@@ -28,7 +33,6 @@ There are currently 3 ways to specify filters:
 1) Without any arguments. There will be an assistant that guides you through common options. Some advanced options will not be shown.
 2) Command line usage
 3) Using a preset file
-
 
 
 ### Presets
@@ -48,31 +52,45 @@ The options in the preset file are named the same as the command line options li
 Currently available command line options (more to be implemented):
 
 ```
-usage: arbsmapdo.py [-h] [--preset PRESET]
-                    [--levels_to_download LEVELS_TO_DOWNLOAD]
-                    [--stars_min STARS_MIN] [--stars_max STARS_MAX]
-                    [--ranked RANKED] [--scoresaber_sorting {0,1,2}]
-                    [--tmp_dir TMP_DIR] [--download_dir DOWNLOAD_DIR]
-                    [--max_threads MAX_THREADS]
-                    [--scoresaber_maxlimit SCORESABER_MAXLIMIT]
-                    [--save_preset SAVE_PRESET]
-                    [--vote_ratio_min VOTE_RATIO_MIN]
-                    [--vote_ratio_max VOTE_RATIO_MAX]
-                    [--duration_min DURATION_MIN]
-                    [--duration_max DURATION_MAX]
+usage: arbsmapdo.exe [-h] [--preset PRESET] [-levels LEVELS_TO_DOWNLOAD]xe --help
+                     [--noextract] [--stars_min STARS_MIN]
+                     [--stars_max STARS_MAX] [--ranked_only RANKED_ONLY]
+                     [--scoresaber_sorting {0,1,2}] [--tmp_dir TMP_DIR]
+                     [--download_dir DOWNLOAD_DIR]
+                     [--playlist_dir PLAYLIST_DIR] [--max_threads MAX_THREADS]
+                     [--scoresaber_maxlimit SCORESABER_MAXLIMIT]
+                     [--save_preset SAVE_PRESET]
+                     [--beatmap_rating_min BEATMAP_RATING_MIN]
+                     [--beatmap_rating_max BEATMAP_RATING_MAX]
+                     [--length_min LENGTH_MIN] [--length_max LENGTH_MAX]
+                     [--nps_min NPS_MIN] [--nps_max NPS_MAX]
+                     [--notes_min NOTES_MIN] [--notes_max NOTES_MAX]
+                     [--rescan] [--beatsaver_cachefile BEATSAVER_CACHEFILE]
+                     [--levelhash_cachefile LEVELHASH_CACHEFILE]
+                     [--playlist PLAYLIST] [--playlist_image PLAYLIST_IMAGE]
+                     [-s]
+                     [URIs [URIs ...]]
+
+positional arguments:
+  URIs                  URI (Path or URL) to map or playlist (*.bplist).
+                        ARBSMapDo will download and install the specified
+                        map/list.
 
 optional arguments:
   -h, --help            show this help message and exit
   --preset PRESET       Path to the preset to use (default:
                         arbsmapdo_default.toml
-  --levels_to_download LEVELS_TO_DOWNLOAD
+  -levels LEVELS_TO_DOWNLOAD, --levels_to_download LEVELS_TO_DOWNLOAD
                         Number of levels to download. One level may have
                         multiple difficulties!
+  --noextract           Do not extract *.zip files. Helpful for Quest users as
+                        you can upload them directly to BMBF!
   --stars_min STARS_MIN
                         Minimum star difficulty for ranked maps
   --stars_max STARS_MAX
                         Maximum star difficulty for ranked maps
-  --ranked RANKED       Only download ranked maps (True or False / 1 or 0)
+  --ranked_only RANKED_ONLY
+                        Only download ranked maps (True or False / 1 or 0)
   --scoresaber_sorting {0,1,2}
                         Scoresaber Sorting Mode. Choices: 0 - Trends, 1 - Date
                         Ranked, 2 - Scores Set, 3 - Star Difficulty
@@ -81,6 +99,9 @@ optional arguments:
                         Final download folder where custom levels get
                         extracted (usually '[BeatSaberPath]\Beat
                         Saber_Data\CustomLevels')
+  --playlist_dir PLAYLIST_DIR
+                        Directory where playlist files will be saved at
+                        (usually '[BeatSaberPath]\Playlists')
   --max_threads MAX_THREADS
                         Maximim thread count to use for downloading.
   --scoresaber_maxlimit SCORESABER_MAXLIMIT
@@ -89,16 +110,38 @@ optional arguments:
   --save_preset SAVE_PRESET
                         Save specified settings into given file. You can load
                         it next time by using --preset
-  --vote_ratio_min VOTE_RATIO_MIN
-                        Minimum percentage of positive votes of total votes.
-                        (Between 0 and 1)
-  --vote_ratio_max VOTE_RATIO_MAX
-                        Maximum percentage of positive votes of total votes.
-                        (Between 0 and 1)
-  --duration_min DURATION_MIN
-                        Minimum song duration in seconds
-  --duration_max DURATION_MAX
-                        Maximum song duration in seconds
+  --beatmap_rating_min BEATMAP_RATING_MIN
+                        Minimum beatmap rating. (Between 0 and 1)
+  --beatmap_rating_max BEATMAP_RATING_MAX
+                        Maximum beatmap rating. (Between 0 and 1)
+  --length_min LENGTH_MIN
+                        Minimum map length in seconds
+  --length_max LENGTH_MAX
+                        Maximum map length in seconds
+  --nps_min NPS_MIN     Minimum notes per second
+  --nps_max NPS_MAX     Maximum notes per second
+  --notes_min NOTES_MIN
+                        Minimum total note count
+  --notes_max NOTES_MAX
+                        Maximum total note count
+  --rescan              Force rescan of already downloaded songs. This resets
+                        the cache and results in manually deleted songs being
+                        in the pool again.
+  --beatsaver_cachefile BEATSAVER_CACHEFILE
+                        Cache file used for BeatSaver cache. (You usually
+                        don't have to change this.)
+  --levelhash_cachefile LEVELHASH_CACHEFILE
+                        Cache file used for caching already calculated level
+                        hashes. (You usually don't have to change this.)
+  --playlist PLAYLIST   Playlist (file name) where levels from this session
+                        should be added. If the specified playlist does not
+                        exist yet, it will be created.
+  --playlist_image PLAYLIST_IMAGE
+                        When creating a new playlist, use this image. If not
+                        given, the default image will be used.
+  -s, --skip_assistant  Skip assistant except for neccessary things. You'll
+                        need to specify every argument via command line or
+                        preset
 ```
 
 
