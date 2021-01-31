@@ -42,7 +42,7 @@ class Playlist():
 
     def add_to_playlist(self, level):
         # Avoid duplicates
-        levelhash = level["beatsaver_info"]["_id"]
+        levelhash = level["beatsaver_info"]["hash"]
 
         if not self.exists_in_playlist(levelhash):
             mini_info = {
