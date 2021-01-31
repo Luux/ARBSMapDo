@@ -28,6 +28,8 @@ class advanced_downloader():
     def __init__(self, config: dict):
         
         self.download_dir = Path(config["download_dir"])
+        self.download_dir.mkdir(exist_ok=True)
+
         self.playlist_dir = Path(config["playlist_dir"])
         self.tmp_dir = dir_script.joinpath(config["tmp_dir"])
         self.max_threads = config["max_threads"]
