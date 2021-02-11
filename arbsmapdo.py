@@ -71,6 +71,12 @@ class ConfigHandler:
             self.config[key] = value
 
     def handle_non_assistant_default_values(self):
+        """
+        We cannot simply use argparse defaults as we have to check if the user manually specified an argument or not.
+        (If the user has not specified a CL argument, it becomes None -> load config value instead)
+        TODO: This can be done a bit less hacky
+        """
+        
         default_values = {
             "beatmap_rating_max": 1,
             "tmp_dir": "./tmp",
