@@ -31,7 +31,7 @@ class ConfigHandler:
     1) Using the Interactive Assistant
     2) Via Command Line Arguments
     3) Passing a Configuration file
-    These three approaches can be mixed altogether, where Config File > CL Args > Interactive
+    These three approaches can be mixed altogether, where Config File < CL Args < Interactive
     However, as so many configuration variants can become quite messy to implement, there's a ConfigHandler
     which serves as a single "Point-of-Trust" and manages all of this. This results in a single final configuration dictionary
     that is used by the other components of ARBSMapDo.
