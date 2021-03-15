@@ -1,3 +1,5 @@
 arbsmapdo_default.toml
 cache
 __pycache__
+/build/lib/ARBSMapDo
+/download

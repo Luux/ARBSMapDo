@@ -4,7 +4,8 @@ import json
 import os
 import zipfile
 import time
-import utils
+
+from . import utils
 
 from inspect import getfile
 from pathlib import Path, PurePath

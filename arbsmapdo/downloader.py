@@ -1,6 +1,3 @@
-import utils
-import playlist
-
 import requests
 import sys
 import os
@@ -8,9 +5,11 @@ import string
 import progressbar
 import threading
 import zipfile
-import cache
-
 import shutil
+
+from . import utils
+from . import playlist
+from . import cache
 
 from inspect import getfile
 from pathlib import Path
@@ -161,14 +160,16 @@ class advanced_downloader():
         """Clean temp dir only if safe (directory is empty)"""
         try:
             shutil.rmtree(self.tmp_dir)
-        except:
+        except Exception as e:
             print("WARNING: Error while cleaning up. Cannot delete tmp directory.")
+            print(e)
 
     def start(self):
         """Starting the main functionality of ARBSMapDo"""
 
         # Create Download Directory if not existant
         self.download_dir.mkdir(exist_ok=True)
+        self.tmp_dir.mkdir(exist_ok=True)
 
         # Search & Filter...
         if self.URIs == []:

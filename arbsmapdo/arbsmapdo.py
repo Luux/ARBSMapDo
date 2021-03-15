@@ -1,12 +1,14 @@
 import os
 import sys
 import toml
-import utils
+
+from . import utils
+
 from argparse import ArgumentParser
 from pathlib import Path
 from inspect import getfile
 
-from downloader import advanced_downloader
+from .downloader import advanced_downloader
 
 dir_script = Path(getfile(lambda: 0)).parent.absolute()
 
@@ -73,7 +75,7 @@ class ConfigHandler:
     def handle_non_assistant_default_values(self):
         default_values = {
             "beatmap_rating_max": 1,
-            "tmp_dir": "./tmp",
+            "tmp_dir": dir_script.joinpath("./tmp"),
             "max_threads": 5,
             "scoresaber_maxlimit": 10000,
             "nps_min": 0,
@@ -129,7 +131,7 @@ class ConfigHandler:
         # We only need the rest if no URI is specified -> else we don't need filtering and therefore we don't need filtering options
         mapfiltering = False
         
-        if config_handler.config["URIs"] == [] :
+        if self.config["URIs"] == [] :
             if self.config.get("skip_assistant") is True:
                 mapfiltering = True
             elif self.config.get("levels_to_download") is None:
@@ -147,7 +149,7 @@ class ConfigHandler:
                     while user_input != "":
                         URIs.append(user_input)
                         user_input = input()
-                    config_handler.config["URIs"] = URIs
+                    self.config["URIs"] = URIs
             else:
                 # ´--levels_to_download is given
                 mapfiltering = True
@@ -275,8 +277,7 @@ class ConfigHandler:
             toml.dump(filtered_config, config_file)
 
 
-
-if __name__ == "__main__":
+def main(args):
     parser = ArgumentParser()
     parser.add_argument("URIs", nargs="*", default=[], help="URI (Path or URL) to map or playlist (*.bplist). ARBSMapDo will download and install the specified map/list.")
     parser.add_argument("--preset", default=default_config_name, help="Path to the preset to use (default: {}".format(default_config_name))
@@ -328,6 +329,10 @@ if __name__ == "__main__":
     # Only for EXE releases
     # print("\n\nDone! Press enter to close ARBSMapDo.")
     # input()
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
 
 
 

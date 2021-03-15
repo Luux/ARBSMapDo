@@ -1,5 +1,6 @@
 import json
-import utils
+
+from . import utils
 
 from pathlib import Path
 from pathvalidate import sanitize_filename
