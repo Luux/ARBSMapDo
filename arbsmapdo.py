@@ -31,7 +31,7 @@ class ConfigHandler:
     1) Using the Interactive Assistant
     2) Via Command Line Arguments
     3) Passing a Configuration file
-    These three approaches can be mixed altogether, where Config File > CL Args > Interactive
+    These three approaches can be mixed altogether, where Config File < CL Args < Interactive
     However, as so many configuration variants can become quite messy to implement, there's a ConfigHandler
     which serves as a single "Point-of-Trust" and manages all of this. This results in a single final configuration dictionary
     that is used by the other components of ARBSMapDo.
@@ -71,6 +71,12 @@ class ConfigHandler:
             self.config[key] = value
 
     def handle_non_assistant_default_values(self):
+        """
+        We cannot simply use argparse defaults as we have to check if the user manually specified an argument or not.
+        (If the user has not specified a CL argument, it becomes None -> load config value instead)
+        TODO: This can be done a bit less hacky
+        """
+        
         default_values = {
             "beatmap_rating_max": 1,
             "tmp_dir": "./tmp",
