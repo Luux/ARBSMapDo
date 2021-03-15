@@ -59,7 +59,7 @@ def calculate_Level_hash_from_dir(levelPath):
 
     with open(infoPath, "rb") as tmpfile:
         info_binary = tmpfile.read()
-        info_data = json.loads(info_binary, encoding="utf-8")
+        info_data = json.loads(info_binary)
 
     # We need to calculate sha1 hashes of the concatenation of info.dat and each difficulty listed there
     hasher = hashlib.sha1()
