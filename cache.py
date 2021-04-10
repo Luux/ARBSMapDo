@@ -39,6 +39,8 @@ class Cache:
         print("Updating Local BeatSaver Cache. This helps avoiding spamming the API hundreds of times.")
         print("Downloading beatSaverScrappedData (helps to avoid spamming beatsaver API)...")
 
+        self.beatsaver_cachefile.unlink(missing_ok=True)
+
         dl_filename = str(self.tmp_dir.joinpath("andruzzzhka_scrape.zip"))
         wget.download(beatsaver_scraped_data_url, dl_filename)
 
@@ -51,7 +53,8 @@ class Cache:
         except zipfile.BadZipFile as e:
             # Workaround for https://github.com/andruzzzhka/BeatSaberScrappedData/issues/6
             print(f"Error when extracting zipfile:\n{e}\nDownloading uncompressed json instead (will be slower!)...")
-            wget.download("https://raw.githubusercontent.com/andruzzzhka/BeatSaberScrappedData/master/beatSaverScrappedData.json")
+            wget.download("https://raw.githubusercontent.com/andruzzzhka/BeatSaberScrappedData/master/beatSaverScrappedData.json",
+                          out=str(self.beatsaver_cachefile))
 
         last_updated = time.time()
         print("\nCache ready.")
