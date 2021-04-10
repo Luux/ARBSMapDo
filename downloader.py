@@ -432,8 +432,8 @@ class advanced_downloader():
         author = "".join(c for c in level_scoresaber_dict["beatsaver_info"]["metadata"]["levelAuthorName"] if c in valid_chars).replace(" ", "-")
         levelname = "".join(c for c in level_scoresaber_dict["beatsaver_info"]["name"] if c in valid_chars).replace(" ", "-")
 
-        return "{id}_{author}_{levelname}".format(
-            id=level_scoresaber_dict["beatsaver_info"]["hash"].upper(),
+        return "{id} ({levelname} - {author})".format(
+            id=level_scoresaber_dict["beatsaver_info"]["key"].lower(),
             author=author,
             levelname=levelname
         )
