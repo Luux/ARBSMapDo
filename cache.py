@@ -1,3 +1,4 @@
+import warnings
 import wget
 import requests
 import json
@@ -42,11 +43,16 @@ class Cache:
         wget.download(beatsaver_scraped_data_url, dl_filename)
 
         # Unzip
-        with zipfile.ZipFile(str(dl_filename), "r") as zip_file:
-            zip_file.extractall(str(self.tmp_dir))
-        
-        # Replace old local cache by updated version
-        os.replace(self.tmp_dir.joinpath("beatSaverScrappedData.json"), self.beatsaver_cachefile)
+        try:
+            with zipfile.ZipFile(str(dl_filename), "r") as zip_file:
+                zip_file.extractall(str(self.tmp_dir))
+                # Replace old local cache by updated version
+                os.replace(self.tmp_dir.joinpath("beatSaverScrappedData.json"), self.beatsaver_cachefile)
+        except zipfile.BadZipFile as e:
+            # Workaround for https://github.com/andruzzzhka/BeatSaberScrappedData/issues/6
+            print(f"Error when extracting zipfile:\n{e}\nDownloading uncompressed json instead (will be slower!)...")
+            wget.download("https://raw.githubusercontent.com/andruzzzhka/BeatSaberScrappedData/master/beatSaverScrappedData.json")
+
         last_updated = time.time()
         print("\nCache ready.")
 
