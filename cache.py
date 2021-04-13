@@ -83,7 +83,7 @@ class Cache:
 
         cache_dict = dict()
         for levelinfo in scraped_cache_raw:
-            cache_dict[levelinfo["hash"]] = levelinfo
+            cache_dict[levelinfo["hash"].lower()] = levelinfo
 
         return cache_dict, last_modified
 
