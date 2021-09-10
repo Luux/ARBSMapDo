@@ -24,7 +24,7 @@ headers = {"User-Agent": "ARBSMapDo V1"}
 
 class advanced_downloader():
     def __init__(self, config: dict):
-        
+
         self.download_dir = Path(config["download_dir"])
         self.download_dir.mkdir(exist_ok=True)
 
@@ -35,9 +35,10 @@ class advanced_downloader():
         self.max_threads = config["max_threads"]
         self.URIs = config["URIs"]
         self.noextract = config["noextract"]
-        
+
         playlist_name = config.get("playlist")
-        self.playlist = playlist.Playlist(config) if playlist_name is not None else None
+        self.playlist = playlist.Playlist(
+            config) if playlist_name is not None else None
 
         # Only when filtering
         if self.URIs == []:
@@ -66,7 +67,7 @@ class advanced_downloader():
 
         def check_for_duplicates(level_hash):
             # Check for duplicates during the current session
-             # May occur when downloading multiple playlists
+            # May occur when downloading multiple playlists
             for other_level in levels_to_download:
                 if other_level["beatsaver_info"]["hash"].upper() == level_hash.upper():
                     return True
@@ -78,7 +79,7 @@ class advanced_downloader():
             # Handle single level url...
             if URI_type is utils.URI_type.unknown:
                 print("URI {} not recognized. This type of content may not be implemented for direct DL yet. Please try downloading the song/playlist manually."
-                                          .format(URI))
+                      .format(URI))
                 next
 
             if URI_type in [utils.URI_type.map_beatsaver, utils.URI_type.map_bsaber, utils.URI_type.map_scoresaber]:
@@ -92,7 +93,7 @@ class advanced_downloader():
                 if beatsaver_info is not None:
                     level_hash = beatsaver_info["hash"]
                     level_dict["beatsaver_info"] = beatsaver_info
-                    
+
                     if not check_for_duplicates(level_hash):
 
                         # Add level to playlist if specified
@@ -101,7 +102,8 @@ class advanced_downloader():
 
                         # Check if level is already installed
                         if self.does_level_already_exist(level_hash):
-                            print("Level {} already exists. Skipping or only adding to playlist.".format(level_hash))
+                            print("Level {} already exists. Skipping or only adding to playlist.".format(
+                                level_hash))
                             next
                         else:
                             levels_to_download.append(level_dict)
@@ -125,7 +127,8 @@ class advanced_downloader():
                     with open(str(bplist_path), "wb+") as tmp:
                         tmp.write(data.content)
 
-                level_hashes = utils.get_level_hashes_from_playlist(bplist_path)
+                level_hashes = utils.get_level_hashes_from_playlist(
+                    bplist_path)
 
                 for level_hash in level_hashes:
                     beatsaver_info = self.cache.get_beatsaver_info(level_hash)
@@ -141,18 +144,21 @@ class advanced_downloader():
                             levels_to_download.append(level)
 
                 if len(levels_to_download) < len(level_hashes):
-                    print("{} levels of the specified playlist have already been downloaded. These will be skipped.".format(len(level_hashes) - len(levels_to_download)))
-                
+                    print("{} levels of the specified playlist have already been downloaded. These will be skipped.".format(
+                        len(level_hashes) - len(levels_to_download)))
+
                 local_bplists.append(bplist_path)
 
-                print("Downloading {} new levels.".format(len(levels_to_download)))
+                print("Downloading {} new levels.".format(
+                    len(levels_to_download)))
         print("")
         self.download_levels(levels_to_download)
 
         # As soon as every level is downloaded, move bplist to playlist folder
         for bplist in local_bplists:
             try:
-                shutil.copy(str(bplist), str(self.playlist_dir.joinpath(bplist.name)))
+                shutil.copy(str(bplist), str(
+                    self.playlist_dir.joinpath(bplist.name)))
             except shutil.SameFileError:
                 print("Playlist is already in playlist directory")
             print("Installed Playlist: {}".format(bplist_path.name))
@@ -186,7 +192,7 @@ class advanced_downloader():
         else:
             # ...or install directly
             self.install_from_URIs(self.URIs)
-        
+
         # Save calculated hashes
         self.cache.save_levelhash_cache()
 
@@ -216,14 +222,18 @@ class advanced_downloader():
             while (finished < len(levels)):
                 if(next_level_number < len(levels) and len(current_threads) < self.max_threads):
                     level = levels[next_level_number]
-                    download_url = "https://beatsaver.com" + level["beatsaver_info"]["directDownload"]
-                    levelhash = level["beatsaver_info"]["hash"].upper()
+                    # HACK
+                    # TODO fix the hardcoded [0] - or is it fine?
+                    download_url = level["beatsaver_info"]["versions"][0]["downloadURL"]
+                    levelhash = level["beatsaver_info"]["versions"][0]["hash"].upper(
+                    )
                     name = self._get_level_dirname(level)
                     self.cache.levelhash_cache[name] = levelhash
 
                     # Start Thread for DL
                     print("Downloading " + name)
-                    thread = threading.Thread(target=self._download_level, args=[download_url, name])
+                    thread = threading.Thread(
+                        target=self._download_level, args=[download_url, name])
                     current_threads.append(thread)
                     thread.start()
                     next_level_number += 1
@@ -236,7 +246,6 @@ class advanced_downloader():
                         else:
                             i += 1
                 bar.update(finished)
-
 
     def _download_level(self, url, name):
         """Threading helper function to download a single level"""
@@ -264,8 +273,6 @@ class advanced_downloader():
 
             tmp_path.unlink()
 
-
-
     def fetch_and_filter(self):
         """
         1) Scan scoresaber
@@ -283,15 +290,17 @@ class advanced_downloader():
         # getting information from BeatSaver to save some time (Scoresaber is way faster than BeatSaver)
         print("Beginning map search. This may take multiple passes depending on how restrictive your filters are.")
         while len(download_list) < self.levels_to_download:
-            print("Searching on Scoresaber for levels to download. Need to find {} more songs.".format(self.levels_to_download - len(download_list)))
+            print("Searching on Scoresaber for levels to download. Need to find {} more songs.".format(
+                self.levels_to_download - len(download_list)))
 
-            #with progressbar.ProgressBar(max_value=self.levels_to_download - len(download_list), redirect_stdout=False) as bar_levelsearch:
-                #bar_levelsearch.update(0)
+            # with progressbar.ProgressBar(max_value=self.levels_to_download - len(download_list), redirect_stdout=False) as bar_levelsearch:
+            # bar_levelsearch.update(0)
             scoresaber_filtered_list = []
 
             while len(scoresaber_filtered_list) < self.levels_to_download - len(download_list):
                 limit = self.scoresaber_maxlimit
-                remaining = self.levels_to_download - len(download_list) - len(scoresaber_filtered_list)
+                remaining = self.levels_to_download - \
+                    len(download_list) - len(scoresaber_filtered_list)
 
                 page = int(((requested_unfiltered) / limit) + 1)
 
@@ -302,9 +311,11 @@ class advanced_downloader():
                 if len(levels) == 0:
                     # Early Abort, no more songs with these filters -> Proceed to download stage
                     if len(download_list) == 0:
-                        print("Could not find any new levels under the given criteria.")
+                        print(
+                            "Could not find any new levels under the given criteria.")
                     else:
-                        print("Could not find more than {} levels under the given criteria.".format(len(download_list)))
+                        print("Could not find more than {} levels under the given criteria.".format(
+                            len(download_list)))
                     return download_list
 
                 # ScoreSaber is faster, so we filter based on only scoresaber information first before accessing BeatSaver
@@ -316,19 +327,22 @@ class advanced_downloader():
                         ids_to_filter.append(level["id"])
 
                 scoresaber_filtered_list.extend(filtered)
-                print("Filtered " + str(len(scoresaber_filtered_list)) + " potential candidates from Scoresaber data only")
+                print("Filtered " + str(len(scoresaber_filtered_list)) +
+                      " potential candidates from Scoresaber data only")
                 # print("Total entries processed from ScoreSaber: " + str(requested_unfiltered))
-                #sys.stdout.flush()
-        
+                # sys.stdout.flush()
+
                 # Adding information from scoresaber including download URL
                 filtered_beatsaver = 0
                 print("Filtering candidates by info from beatsaver...")
                 with progressbar.ProgressBar(max_len=len(scoresaber_filtered_list), redirect_stdout=True) as bar:
                     for level in scoresaber_filtered_list:
-                        level["beatsaver_info"] = self.cache.get_beatsaver_info(level["id"])
+                        level["beatsaver_info"] = self.cache.get_beatsaver_info(
+                            level["id"])
                         if self._filter_level_with_beatsaver_info(level) is True:
                             download_list.append(level)
-                            print("Found Levels: {}/{}".format(len(download_list), self.levels_to_download))
+                            print(
+                                "Found Levels: {}/{}".format(len(download_list), self.levels_to_download))
                         filtered_beatsaver += 1
                         bar.update(filtered_beatsaver)
                         if len(download_list) == self.levels_to_download:
@@ -354,13 +368,17 @@ class advanced_downloader():
         # We just need to download a level1 once, lol.
         if scoresaber_info["id"] in ids_to_filter:
             return False
-        
+
         return True
 
     def _filter_level_with_beatsaver_info(self, level):
-        def _filter_difficulty(difficulty_info, level):
+        def _filter_difficulty(difficulty_info):
             if difficulty_info is None:
                 return False
+            mode = difficulty_info.get("characteristic")
+            if mode.lower() != self.gamemode.lower() and self.gamemode is not None:
+                return False
+
             length = float(difficulty_info["length"])
             note_count = int(difficulty_info["notes"])
 
@@ -380,17 +398,12 @@ class advanced_downloader():
                 return False
 
             return True
-        
-        def _filter_characteristic(characteristic):
-            name = characteristic.get("name")
-            if name != self.gamemode and self.gamemode is not None:
-                return False
 
-            difficulties = characteristic.get("difficulties")
-            for info in difficulties.values():
-                if _filter_difficulty(info, level):
-                    return True
-
+        def _filter_version(version):
+            if version["state"] == "Published":
+                for diff in version["diffs"]:
+                    if _filter_difficulty(diff):
+                        return True
 
         bs_info = level.get("beatsaver_info")
         if bs_info is None:
@@ -401,22 +414,19 @@ class advanced_downloader():
             print("Skipping Level due to missing metadata:\n{}".format(level))
             return False
         bs_stats = bs_info["stats"]
-        bs_upvotes = int(bs_stats["upVotes"])
-        bs_downvotes = int(bs_stats["downVotes"])
-        bs_rating = float(bs_stats["rating"])
+        upvotes = int(bs_stats["upvotes"])
+        downvotes = int(bs_stats["downvotes"])
+        score = float(bs_stats["score"])
 
         # Filter each difficulty
-        bs_characteristics = bs_metadata.get("characteristics")
-
-        characteristics_ok = False
-        for characteristic in bs_characteristics:
-            if _filter_characteristic(characteristic):
-                characteristics_ok = True
-        
-        if bs_rating < self.beatmap_rating_min or bs_rating > self.beatmap_rating_max:
+        versions_ok = False
+        for version in bs_info["versions"]:
+            if _filter_version(version):
+                versions_ok = True
+        if not versions_ok:
             return False
 
-        if not characteristics_ok:
+        if score < self.beatmap_rating_min or score > self.beatmap_rating_max:
             return False
 
         return True
@@ -429,11 +439,14 @@ class advanced_downloader():
         # we need to filter them out
         valid_chars = "-_() %s%s" % (string.ascii_letters, string.digits)
 
-        author = "".join(c for c in level_scoresaber_dict["beatsaver_info"]["metadata"]["levelAuthorName"] if c in valid_chars).replace(" ", "-")
-        levelname = "".join(c for c in level_scoresaber_dict["beatsaver_info"]["name"] if c in valid_chars).replace(" ", "-")
+        author = "".join(c for c in level_scoresaber_dict["beatsaver_info"]
+                         ["metadata"]["levelAuthorName"] if c in valid_chars).replace(" ", "-")
+        levelname = "".join(
+            c for c in level_scoresaber_dict["beatsaver_info"]["name"] if c in valid_chars).replace(" ", "-")
 
         return "{id} ({levelname} - {author})".format(
-            id=level_scoresaber_dict["beatsaver_info"]["key"].lower(),
+            id=level_scoresaber_dict["beatsaver_info"]["id"].lower(
+            ),
             author=author,
             levelname=levelname
         )
@@ -447,6 +460,7 @@ class advanced_downloader():
                                 headers=headers)
         if response.ok:
             return response.json()
+
 
 if __name__ == "__main__":
     print("This is just the internal downloader class. Please run arbsmapdo.py instead :)")
